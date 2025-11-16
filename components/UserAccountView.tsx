@@ -71,8 +71,17 @@ export default function UserAccountView({
     if (!confirm('Êtes-vous sûr de vouloir supprimer cette annonce ?')) return
 
     try {
-      const { error } = await supabase.from('announcements').delete().eq('id', id)
-      if (error) throw error
+      // Si c'est une vue admin, utiliser le client admin pour contourner RLS
+      if (isAdminView && adminUserId) {
+        // Créer une route API pour la suppression admin
+        const response = await fetch(`/api/admin/announcements/${id}`, {
+          method: 'DELETE',
+        })
+        if (!response.ok) throw new Error('Erreur lors de la suppression')
+      } else {
+        const { error } = await supabase.from('announcements').delete().eq('id', id)
+        if (error) throw error
+      }
       router.refresh()
     } catch (err: any) {
       alert('Erreur lors de la suppression: ' + err.message)
@@ -81,11 +90,21 @@ export default function UserAccountView({
 
   const handleMarkAsResolved = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('announcements')
-        .update({ status: 'resolved' })
-        .eq('id', id)
-      if (error) throw error
+      // Si c'est une vue admin, utiliser le client admin pour contourner RLS
+      if (isAdminView && adminUserId) {
+        const response = await fetch(`/api/admin/announcements/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'resolved' }),
+        })
+        if (!response.ok) throw new Error('Erreur lors de la mise à jour')
+      } else {
+        const { error } = await supabase
+          .from('announcements')
+          .update({ status: 'resolved' })
+          .eq('id', id)
+        if (error) throw error
+      }
       router.refresh()
     } catch (err: any) {
       alert('Erreur lors de la mise à jour: ' + err.message)
