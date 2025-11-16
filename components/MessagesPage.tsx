@@ -58,24 +58,74 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
           event: 'INSERT',
           schema: 'public',
           table: 'messages',
-          filter: `sender_id=eq.${user.id},recipient_id=eq.${user.id}`,
+          filter: `sender_id=eq.${user.id}`,
         },
-        (payload) => {
+        async (payload) => {
           // Fetch the new message with relations
-          supabase
+          const { data } = await supabase
             .from('messages')
-            .select('*, sender:sender_id(email), recipient:recipient_id(email), announcement:announcements(id, title)')
+            .select('*, announcement:announcements(id, title)')
             .eq('id', payload.new.id)
             .single()
-            .then(({ data }) => {
-              if (data) {
-                setMessages((prev) => {
-                  // Avoid duplicates
-                  if (prev.find(m => m.id === data.id)) return prev
-                  return [data, ...prev]
-                })
+          
+          if (data) {
+            // Fetch sender and recipient emails
+            try {
+              const { data: senderEmail } = await supabase.rpc('get_user_email', { user_id: data.sender_id })
+              const { data: recipientEmail } = await supabase.rpc('get_user_email', { user_id: data.recipient_id })
+              
+              const messageWithUsers = {
+                ...data,
+                sender: { email: senderEmail || 'Utilisateur inconnu' },
+                recipient: { email: recipientEmail || 'Utilisateur inconnu' },
               }
-            })
+              
+              setMessages((prev) => {
+                // Avoid duplicates
+                if (prev.find(m => m.id === messageWithUsers.id)) return prev
+                return [messageWithUsers, ...prev]
+              })
+            } catch (err) {
+              console.error('Error loading user emails:', err)
+            }
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `recipient_id=eq.${user.id}`,
+        },
+        async (payload) => {
+          // Same logic for messages received
+          const { data } = await supabase
+            .from('messages')
+            .select('*, announcement:announcements(id, title)')
+            .eq('id', payload.new.id)
+            .single()
+          
+          if (data) {
+            try {
+              const { data: senderEmail } = await supabase.rpc('get_user_email', { user_id: data.sender_id })
+              const { data: recipientEmail } = await supabase.rpc('get_user_email', { user_id: data.recipient_id })
+              
+              const messageWithUsers = {
+                ...data,
+                sender: { email: senderEmail || 'Utilisateur inconnu' },
+                recipient: { email: recipientEmail || 'Utilisateur inconnu' },
+              }
+              
+              setMessages((prev) => {
+                if (prev.find(m => m.id === messageWithUsers.id)) return prev
+                return [messageWithUsers, ...prev]
+              })
+            } catch (err) {
+              console.error('Error loading user emails:', err)
+            }
+          }
         }
       )
       .subscribe()
@@ -160,12 +210,18 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
   )
 
   const currentConversation = conversationList.find(c => c.announcementId === selectedConversation)
-  const currentConversationMessages = selectedConversation && currentConversation
+  
+  // Get messages for the selected conversation
+  const currentConversationMessages = selectedConversation
     ? messages
-        .filter(msg => 
-          msg.announcement_id === selectedConversation &&
-          (msg.sender_id === currentConversation.otherUserId || msg.recipient_id === currentConversation.otherUserId)
-        )
+        .filter(msg => {
+          if (!currentConversation) {
+            // If no conversation found but announcementId is selected, show all messages for this announcement
+            return msg.announcement_id === selectedConversation
+          }
+          return msg.announcement_id === selectedConversation &&
+            (msg.sender_id === currentConversation.otherUserId || msg.recipient_id === currentConversation.otherUserId)
+        })
         .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
     : []
 
@@ -213,7 +269,26 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
   }
 
   const handleSendMessage = async () => {
-    if ((!newMessage.trim() && !selectedPhoto) || !selectedConversation || !user || !currentConversation) return
+    if ((!newMessage.trim() && !selectedPhoto) || !selectedConversation || !user) return
+    
+    // If no currentConversation, we need to find the announcement owner
+    let recipientId = currentConversation?.otherUserId
+    
+    if (!recipientId) {
+      // Fetch announcement to get owner
+      const { data: announcement } = await supabase
+        .from('announcements')
+        .select('user_id')
+        .eq('id', selectedConversation)
+        .single()
+      
+      if (!announcement) {
+        alert('Impossible de trouver l\'annonce')
+        return
+      }
+      
+      recipientId = announcement.user_id
+    }
 
     setIsSending(true)
     setUploadingPhoto(true)
@@ -242,7 +317,7 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
       const messageData: any = {
         announcement_id: selectedConversation,
         sender_id: user.id,
-        recipient_id: currentConversation.otherUserId,
+        recipient_id: recipientId,
         content: newMessage || (photoUrl ? 'Photo partagée' : ''),
         message_type: selectedPhoto ? 'photo' : 'text',
       }
@@ -252,14 +327,27 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
       const { data, error } = await supabase
         .from('messages')
         .insert([messageData])
-        .select('*, sender:sender_id(email), recipient:recipient_id(email), announcement:announcements(id, title)')
+        .select('*, announcement:announcements(id, title)')
         .single()
 
       if (error) throw error
 
-      setMessages([data, ...messages])
+      // Fetch sender and recipient emails using RPC
+      const { data: senderEmail } = await supabase.rpc('get_user_email', { user_id: user.id })
+      const { data: recipientEmail } = await supabase.rpc('get_user_email', { user_id: recipientId })
+      
+      const messageWithUsers = {
+        ...data,
+        sender: { email: senderEmail || 'Utilisateur inconnu' },
+        recipient: { email: recipientEmail || 'Utilisateur inconnu' },
+      }
+
+      setMessages([messageWithUsers, ...messages])
       setNewMessage('')
       removePhoto()
+      
+      // Refresh the page to update conversations
+      router.refresh()
     } catch (err: any) {
       console.error('Error sending message:', err)
       alert('Erreur lors de l\'envoi du message: ' + (err.message || 'Erreur inconnue'))
