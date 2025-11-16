@@ -54,7 +54,14 @@ CREATE POLICY "Admins can view all messages"
 -- Admins can create messages for any ticket
 CREATE POLICY "Admins can create messages"
   ON ticket_messages FOR INSERT
-  WITH CHECK (is_admin());
+  WITH CHECK (
+    is_admin = TRUE
+    AND (
+      (auth.jwt() ->> 'email')::text LIKE '%admin%' 
+      OR (auth.jwt() ->> 'email')::text LIKE '%retrouvafrik%'
+      OR (auth.jwt() -> 'user_metadata' ->> 'role')::text = 'admin'
+    )
+  );
 
 -- Users can update their own messages (only if not admin)
 CREATE POLICY "Users can update their own messages"
@@ -65,6 +72,20 @@ CREATE POLICY "Users can update their own messages"
 -- Admins can update all messages
 CREATE POLICY "Admins can update all messages"
   ON ticket_messages FOR UPDATE
-  USING (is_admin())
-  WITH CHECK (is_admin());
+  USING (
+    is_admin = TRUE
+    AND (
+      (auth.jwt() ->> 'email')::text LIKE '%admin%' 
+      OR (auth.jwt() ->> 'email')::text LIKE '%retrouvafrik%'
+      OR (auth.jwt() -> 'user_metadata' ->> 'role')::text = 'admin'
+    )
+  )
+  WITH CHECK (
+    is_admin = TRUE
+    AND (
+      (auth.jwt() ->> 'email')::text LIKE '%admin%' 
+      OR (auth.jwt() ->> 'email')::text LIKE '%retrouvafrik%'
+      OR (auth.jwt() -> 'user_metadata' ->> 'role')::text = 'admin'
+    )
+  );
 

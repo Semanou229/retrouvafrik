@@ -43,7 +43,33 @@ export default function AdminSupportManager({
   const [success, setSuccess] = useState<string | null>(null)
   const [editingTicket, setEditingTicket] = useState<string | null>(null)
   const [internalNotes, setInternalNotes] = useState('')
+  const [selectedTicket, setSelectedTicket] = useState<any | null>(null)
   const supabase = createSupabaseClient()
+
+  const loadTickets = async () => {
+    setIsLoading(true)
+    try {
+      let query = supabase
+        .from('support_tickets')
+        .select('*, announcement:announcements(id, title)')
+        .order('created_at', { ascending: false })
+
+      if (statusFilter !== 'all') {
+        query = query.eq('status', statusFilter)
+      }
+      if (priorityFilter !== 'all') {
+        query = query.eq('priority', priorityFilter)
+      }
+
+      const { data, error } = await query
+      if (error) throw error
+      setTickets(data || [])
+    } catch (err: any) {
+      setError(err.message || 'Erreur lors du chargement')
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const filteredTickets = useMemo(() => {
     let filtered = [...tickets]
