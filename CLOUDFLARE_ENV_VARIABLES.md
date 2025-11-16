@@ -5,13 +5,20 @@
 **IMPORTANT** : Utilisez la commande de build suivante dans Cloudflare Pages :
 
 ```
-npm ci --legacy-peer-deps || npm install --legacy-peer-deps && npm run build:cloudflare
+npm ci --legacy-peer-deps || npm install --legacy-peer-deps && npm run build:cloudflare && npm run pages:build
 ```
 
 Cette commande :
 1. Installe les dépendances avec `--legacy-peer-deps`
 2. Lance le build Next.js
 3. Nettoie automatiquement le cache webpack (qui peut dépasser 25 MiB par fichier)
+4. **Génère les fichiers pour Cloudflare Pages avec `@cloudflare/next-on-pages`**
+
+## Répertoire de Sortie
+
+**Build output directory :** `.vercel/output/static`
+
+Ce répertoire est généré par `@cloudflare/next-on-pages` et contient les fichiers optimisés pour Cloudflare Pages.
 
 ## Variables Requises
 
