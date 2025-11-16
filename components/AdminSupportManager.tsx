@@ -22,6 +22,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import type { SupportTicket } from '@/lib/types'
+import TicketDetailModal from './TicketDetailModal'
 
 interface AdminSupportManagerProps {
   initialTickets: any[]
@@ -406,6 +407,13 @@ export default function AdminSupportManager({
                       )}
                     </div>
                     <div className="flex flex-col gap-2 ml-4">
+                      <button
+                        onClick={() => setSelectedTicket(ticket)}
+                        className="p-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                        title="Voir et répondre"
+                      >
+                        <MessageCircle className="w-5 h-5" />
+                      </button>
                       {ticket.status === 'open' && (
                         <button
                           onClick={() => handleAssign(ticket.id)}

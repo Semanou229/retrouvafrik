@@ -2,6 +2,7 @@ import Navigation from '@/components/Navigation'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import SupportTicketForm from '@/components/SupportTicketForm'
+import SupportTicketItem from '@/components/SupportTicketItem'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'edge'
@@ -24,6 +25,14 @@ export default async function SupportPage() {
     .order('created_at', { ascending: false })
     .limit(20)
 
+  // Récupérer les tickets récents de l'utilisateur
+  const { data: userTickets } = await supabase
+    .from('support_tickets')
+    .select('*, announcement:announcements(id, title)')
+    .eq('user_id', session.user.id)
+    .order('created_at', { ascending: false })
+    .limit(10)
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
@@ -35,6 +44,18 @@ export default async function SupportPage() {
             Nous sommes là pour vous aider. Soumettez un ticket et notre équipe vous répondra rapidement.
           </p>
         </div>
+
+        {/* Liste des tickets récents */}
+        {userTickets && userTickets.length > 0 && (
+          <div className="mb-8 bg-white rounded-xl shadow-lg border border-gray-100 p-6">
+            <h2 className="text-xl font-bold mb-4">Mes tickets récents</h2>
+            <div className="space-y-3">
+              {userTickets.map((ticket) => (
+                <SupportTicketItem key={ticket.id} ticket={ticket} />
+              ))}
+            </div>
+          </div>
+        )}
 
         <SupportTicketForm userAnnouncements={userAnnouncements || []} />
       </div>
