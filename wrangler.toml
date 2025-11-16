@@ -3,9 +3,8 @@ compatibility_date = "2024-01-01"
 pages_build_output_dir = ".next"
 
 # Configuration pour Cloudflare Pages
-[build]
-command = "npm run build"
-cwd = "."
+# Note: Cloudflare Pages détecte automatiquement Next.js
+# La commande de build doit être configurée dans le dashboard Cloudflare
 
 # Variables d'environnement peuvent être définies ici ou dans le dashboard Cloudflare
 # [vars]
