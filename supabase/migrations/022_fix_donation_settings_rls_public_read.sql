@@ -17,19 +17,13 @@ CREATE POLICY "Anyone can view active donation settings"
 
 -- Créer une politique pour les admins (pour la gestion)
 -- Permet aux admins de voir tous les paramètres, même inactifs
+-- Note: Cette politique sera remplacée par la migration 023 qui utilise la fonction is_admin()
 CREATE POLICY "Admins can view all donation settings"
   ON donation_settings FOR SELECT
   TO authenticated
   USING (
-    EXISTS (
-      SELECT 1 FROM auth.users
-      WHERE auth.users.id = auth.uid()
-      AND (
-        auth.users.email LIKE '%admin%' 
-        OR auth.users.email LIKE '%retrouvafrik%'
-        OR (auth.jwt() ->> 'email') LIKE '%admin%'
-        OR (auth.jwt() ->> 'email') LIKE '%retrouvafrik%'
-      )
-    )
+    (auth.jwt() ->> 'email') LIKE '%admin%' 
+    OR (auth.jwt() ->> 'email') LIKE '%retrouvafrik%'
+    OR (auth.jwt() -> 'user_metadata' ->> 'role') = 'admin'
   );
 

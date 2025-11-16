@@ -2,21 +2,26 @@
 -- Les admins sont identifiés par leur email contenant 'admin' ou 'retrouvafrik'
 
 -- Fonction helper pour vérifier si un utilisateur est admin
+-- Utilise uniquement le JWT token pour éviter les problèmes de permissions
 CREATE OR REPLACE FUNCTION is_admin()
 RETURNS BOOLEAN AS $$
+DECLARE
+  user_email TEXT;
 BEGIN
-  RETURN EXISTS (
-    SELECT 1 FROM auth.users
-    WHERE auth.users.id = auth.uid()
-    AND (
-      auth.users.email LIKE '%admin%' 
-      OR auth.users.email LIKE '%retrouvafrik%'
-      OR (auth.jwt() ->> 'email') LIKE '%admin%'
-      OR (auth.jwt() ->> 'email') LIKE '%retrouvafrik%'
-    )
+  -- Récupérer l'email depuis le JWT token
+  user_email := COALESCE(
+    auth.jwt() ->> 'email',
+    ''
+  );
+  
+  -- Vérifier si l'email contient 'admin' ou 'retrouvafrik'
+  RETURN (
+    user_email LIKE '%admin%' 
+    OR user_email LIKE '%retrouvafrik%'
+    OR user_email LIKE '%@retrouvafrik.%'
   );
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql STABLE;
 
 -- Politiques admin pour les annonces
 -- Admins peuvent voir toutes les annonces (même non approuvées)
@@ -58,11 +63,35 @@ CREATE POLICY "Admins can update all comments"
   WITH CHECK (is_admin());
 
 -- Politiques admin pour donation_settings
--- Admins peuvent gérer les paramètres de don
+-- Supprimer les anciennes politiques qui utilisent auth.users
+DROP POLICY IF EXISTS "Admins can view all donation settings" ON donation_settings;
+DROP POLICY IF EXISTS "Admins can view donation settings" ON donation_settings;
+DROP POLICY IF EXISTS "Admins can update donation settings" ON donation_settings;
+DROP POLICY IF EXISTS "Admins can insert donation settings" ON donation_settings;
 DROP POLICY IF EXISTS "Admins can manage donation settings" ON donation_settings;
-CREATE POLICY "Admins can manage donation settings"
-  ON donation_settings FOR ALL
+
+-- Admins peuvent voir tous les paramètres de don (même inactifs)
+CREATE POLICY "Admins can view all donation settings"
+  ON donation_settings FOR SELECT
+  TO authenticated
+  USING (is_admin());
+
+-- Admins peuvent créer des paramètres de don
+CREATE POLICY "Admins can insert donation settings"
+  ON donation_settings FOR INSERT
+  TO authenticated
+  WITH CHECK (is_admin());
+
+-- Admins peuvent mettre à jour les paramètres de don
+CREATE POLICY "Admins can update donation settings"
+  ON donation_settings FOR UPDATE
   TO authenticated
   USING (is_admin())
   WITH CHECK (is_admin());
+
+-- Admins peuvent supprimer les paramètres de don
+CREATE POLICY "Admins can delete donation settings"
+  ON donation_settings FOR DELETE
+  TO authenticated
+  USING (is_admin());
 
