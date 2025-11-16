@@ -101,12 +101,12 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, selectedConversation])
 
-  // Subscribe to real-time messages
+  // Subscribe to real-time messages for instant updates
   useEffect(() => {
     if (!user) return
 
     const channel = supabase
-      .channel('messages')
+      .channel('messages-realtime')
       .on(
         'postgres_changes',
         {
@@ -138,7 +138,12 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
               setMessages((prev) => {
                 // Avoid duplicates
                 if (prev.find(m => m.id === messageWithUsers.id)) return prev
-                return [messageWithUsers, ...prev]
+                const updated = [messageWithUsers, ...prev]
+                // Auto-scroll to new message
+                setTimeout(() => {
+                  messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+                }, 50)
+                return updated
               })
             } catch (err) {
               console.error('Error loading user emails:', err)
@@ -155,7 +160,7 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
           filter: `recipient_id=eq.${user.id}`,
         },
         async (payload) => {
-          // Same logic for messages received
+          // Instant notification for received messages
           const { data } = await supabase
             .from('messages')
             .select('*, announcement:announcements(id, title)')
@@ -175,7 +180,14 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
               
               setMessages((prev) => {
                 if (prev.find(m => m.id === messageWithUsers.id)) return prev
-                return [messageWithUsers, ...prev]
+                const updated = [messageWithUsers, ...prev]
+                // Auto-scroll if this conversation is selected
+                if (selectedConversation === messageWithUsers.announcement_id) {
+                  setTimeout(() => {
+                    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+                  }, 50)
+                }
+                return updated
               })
             } catch (err) {
               console.error('Error loading user emails:', err)
@@ -183,12 +195,35 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
           }
         }
       )
-      .subscribe()
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'messages',
+          filter: `recipient_id=eq.${user.id}`,
+        },
+        (payload) => {
+          // Update read status instantly
+          setMessages((prev) => 
+            prev.map(msg => 
+              msg.id === payload.new.id 
+                ? { ...msg, ...payload.new }
+                : msg
+            )
+          )
+        }
+      )
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          console.log('✅ Real-time subscription active')
+        }
+      })
 
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [user, supabase])
+  }, [user, supabase, selectedConversation])
 
   // Get unique conversations with unread count
   const conversationsMap = messages.reduce((acc, msg) => {
@@ -398,12 +433,19 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
         recipient: { email: recipientEmail || 'Utilisateur inconnu' },
       }
 
-      setMessages([messageWithUsers, ...messages])
+      // Add message immediately for instant feedback
+      setMessages((prev) => {
+        // Avoid duplicates
+        if (prev.find(m => m.id === messageWithUsers.id)) return prev
+        return [messageWithUsers, ...prev]
+      })
       setNewMessage('')
       removePhoto()
       
-      // Refresh the page to update conversations
-      router.refresh()
+      // Scroll to bottom after a short delay to ensure message is rendered
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+      }, 100)
     } catch (err: any) {
       console.error('Error sending message:', err)
       alert('Erreur lors de l\'envoi du message: ' + (err.message || 'Erreur inconnue'))
