@@ -3,7 +3,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 import AnnouncementsPage from '@/components/AnnouncementsPage'
 
 export const dynamic = 'force-dynamic'
-// export const runtime = 'edge' // Désactivé: async_hooks non disponible dans Edge Runtime
+export const runtime = 'edge'
 
 interface SearchParams {
   category?: string

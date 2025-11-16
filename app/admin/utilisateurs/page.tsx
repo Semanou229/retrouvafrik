@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import AdminUsersManager from '@/components/AdminUsersManager'
 
 export const dynamic = 'force-dynamic'
-// export const runtime = 'edge' // Désactivé: async_hooks non disponible dans Edge Runtime
+export const runtime = 'edge'
 
 export default async function AdminUtilisateursPage() {
   const supabase = createServerSupabaseClient()

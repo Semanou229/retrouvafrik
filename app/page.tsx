@@ -7,8 +7,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 import AnnouncementCard from '@/components/AnnouncementCard'
 
 export const dynamic = 'force-dynamic'
-// Note: Edge Runtime désactivé car async_hooks n'est pas disponible dans Edge Runtime de Cloudflare Pages
-// export const runtime = 'edge'
+export const runtime = 'edge'
 
 export default async function HomePage() {
   const supabase = createServerSupabaseClient()

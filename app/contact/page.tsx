@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
-// export const runtime = 'edge' // Désactivé: async_hooks non disponible dans Edge Runtime
+export const runtime = 'edge'
 
 export default async function ContactPage() {
   const supabase = createServerSupabaseClient()

@@ -5,7 +5,7 @@ import { Heart, Server, Users, Shield, Zap, Globe, ArrowRight } from 'lucide-rea
 import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
-// export const runtime = 'edge' // Désactivé: async_hooks non disponible dans Edge Runtime
+export const runtime = 'edge'
 
 export default async function DonPage() {
   const supabase = createServerSupabaseClient()

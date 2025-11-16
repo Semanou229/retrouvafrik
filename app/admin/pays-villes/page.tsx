@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import CountriesCitiesManager from '@/components/CountriesCitiesManager'
 
 export const dynamic = 'force-dynamic'
-// export const runtime = 'edge' // Désactivé: async_hooks non disponible dans Edge Runtime
+export const runtime = 'edge'
 
 export default async function AdminPaysVillesPage() {
   const supabase = createServerSupabaseClient()

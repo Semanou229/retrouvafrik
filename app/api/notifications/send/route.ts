@@ -1,8 +1,7 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
-// Note: Edge Runtime désactivé car async_hooks n'est pas disponible
-// export const runtime = 'edge'
+export const runtime = 'edge'
 
 export async function POST(request: Request) {
   try {

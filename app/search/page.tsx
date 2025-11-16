@@ -5,7 +5,7 @@ import AnnouncementCard from '@/components/AnnouncementCard'
 import { Search } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
-// export const runtime = 'edge' // Désactivé: async_hooks non disponible dans Edge Runtime
+export const runtime = 'edge'
 
 interface SearchParams {
   type?: string

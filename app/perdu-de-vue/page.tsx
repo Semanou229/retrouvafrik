@@ -5,7 +5,7 @@ import { ArrowRight, Heart } from 'lucide-react'
 import AnnouncementCard from '@/components/AnnouncementCard'
 
 export const dynamic = 'force-dynamic'
-// export const runtime = 'edge' // Désactivé: async_hooks non disponible dans Edge Runtime
+export const runtime = 'edge'
 
 export default async function PerduDeVuePage() {
   const supabase = createServerSupabaseClient()

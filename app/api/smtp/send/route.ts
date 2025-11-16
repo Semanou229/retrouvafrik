@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 
-// Note: Edge Runtime désactivé car async_hooks n'est pas disponible dans Edge Runtime
-// export const runtime = 'edge'
+export const runtime = 'edge'
 
 export async function POST(request: Request) {
   try {

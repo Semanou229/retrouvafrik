@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import AdminStatsDashboard from '@/components/AdminStatsDashboard'
 
 export const dynamic = 'force-dynamic'
-// export const runtime = 'edge' // Désactivé: async_hooks non disponible dans Edge Runtime
+export const runtime = 'edge'
 
 export default async function AdminStatsPage() {
   const supabase = createServerSupabaseClient()
