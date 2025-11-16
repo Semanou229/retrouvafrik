@@ -38,7 +38,7 @@ export default function CommentSection({ announcementId, initialComments }: Comm
               // Utiliser une fonction RPC si disponible, sinon récupérer depuis la table auth.users
               const { data: emailData, error } = await supabase.rpc('get_user_email', {
                 user_id_param: comment.user_id
-              }).catch(() => ({ data: null, error: null }))
+              })
               
               if (!error && emailData) {
                 return {
@@ -58,6 +58,13 @@ export default function CommentSection({ announcementId, initialComments }: Comm
               return { ...comment, user: null }
             } catch (err) {
               console.error('Erreur récupération email:', err)
+              // Fallback: utiliser l'email de l'utilisateur actuel si c'est son commentaire
+              if (user && user.id === comment.user_id) {
+                return {
+                  ...comment,
+                  user: { email: user.email || 'Utilisateur' }
+                }
+              }
               return { ...comment, user: null }
             }
           }
