@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { useAuth } from '@/app/providers'
 import { Search, Plus, Eye, LogIn, LogOut, User, MessageCircle, LayoutDashboard, ChevronDown, Shield, HelpCircle, Info } from 'lucide-react'
 import UnreadMessagesBadge from './UnreadMessagesBadge'
+import AdBanner from './AdBanner'
 import { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 
@@ -48,8 +49,15 @@ export default function Navigation() {
   }, [mobileMenuOpen])
 
   return (
-    <nav className={`bg-white shadow-lg md:sticky md:top-0 ${mobileMenuOpen ? 'z-[50]' : 'z-[100]'} border-b border-gray-100 backdrop-blur-sm bg-white/95 relative`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <>
+      {/* Publicité header */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <AdBanner placement="header" />
+        </div>
+      </div>
+      <nav className={`bg-white shadow-lg md:sticky md:top-0 ${mobileMenuOpen ? 'z-[50]' : 'z-[100]'} border-b border-gray-100 backdrop-blur-sm bg-white/95 relative`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
