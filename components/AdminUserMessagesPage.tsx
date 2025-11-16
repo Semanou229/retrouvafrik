@@ -170,9 +170,17 @@ export default function AdminUserMessagesPage({
         messageData.photo_url = photoUrl
       }
 
-      const { error } = await supabase.from('messages').insert([messageData])
+      // Utiliser l'API admin pour envoyer le message au nom de l'utilisateur
+      const response = await fetch('/api/admin/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(messageData),
+      })
 
-      if (error) throw error
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Erreur lors de l\'envoi')
+      }
 
       setNewMessage('')
       setSelectedPhoto(null)
