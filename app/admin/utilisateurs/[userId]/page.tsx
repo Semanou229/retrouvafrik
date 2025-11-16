@@ -93,9 +93,9 @@ export default async function AdminUserViewPage({
   // Récupérer les informations de l'utilisateur via l'API admin
   let userInfo: any = null
   try {
-    const { data: { users }, error: usersError } = await adminSupabase.auth.admin.listUsers()
-    if (!usersError && users) {
-      userInfo = users.users.find(u => u.id === userId)
+    const { data, error: usersError } = await adminSupabase.auth.admin.listUsers()
+    if (!usersError && data) {
+      userInfo = data.users.find((u: any) => u.id === userId)
     }
   } catch (err) {
     console.error('Error fetching user info:', err)
