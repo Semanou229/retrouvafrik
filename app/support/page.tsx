@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import SupportTicketForm from '@/components/SupportTicketForm'
 
 export const dynamic = 'force-dynamic'
+export const runtime = 'edge'
 
 export default async function SupportPage() {
   const supabase = createServerSupabaseClient()

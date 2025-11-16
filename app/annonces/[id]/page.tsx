@@ -6,6 +6,7 @@ import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 
 export const dynamic = 'force-dynamic'
+export const runtime = 'edge'
 
 export default async function AnnouncementPage({
   params,

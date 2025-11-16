@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import AdminAnnouncementsManager from '@/components/AdminAnnouncementsManager'
 
 export const dynamic = 'force-dynamic'
+export const runtime = 'edge'
 
 export default async function AdminAnnoncesPage({
   searchParams,

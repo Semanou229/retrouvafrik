@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import CountriesCitiesManager from '@/components/CountriesCitiesManager'
 
 export const dynamic = 'force-dynamic'
+export const runtime = 'edge'
 
 export default async function AdminPaysVillesPage() {
   const supabase = createServerSupabaseClient()

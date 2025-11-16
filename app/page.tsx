@@ -7,6 +7,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 import AnnouncementCard from '@/components/AnnouncementCard'
 
 export const dynamic = 'force-dynamic'
+export const runtime = 'edge'
 
 export default async function HomePage() {
   const supabase = createServerSupabaseClient()

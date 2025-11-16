@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import AdminStatsDashboard from '@/components/AdminStatsDashboard'
 
 export const dynamic = 'force-dynamic'
+export const runtime = 'edge'
 
 export default async function AdminStatsPage() {
   const supabase = createServerSupabaseClient()

@@ -6,6 +6,7 @@ import ProfileSettings from '@/components/ProfileSettings'
 import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
+export const runtime = 'edge'
 
 export default async function MonComptePage() {
   const supabase = createServerSupabaseClient()

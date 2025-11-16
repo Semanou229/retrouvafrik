@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import MessagesPage from '@/components/MessagesPage'
 
 export const dynamic = 'force-dynamic'
+export const runtime = 'edge'
 
 export default async function MessagesRoute({
   searchParams,

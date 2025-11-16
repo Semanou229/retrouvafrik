@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import ContactSettingsManager from '@/components/ContactSettingsManager'
 
 export const dynamic = 'force-dynamic'
+export const runtime = 'edge'
 
 export default async function AdminContactPage() {
   const supabase = createServerSupabaseClient()

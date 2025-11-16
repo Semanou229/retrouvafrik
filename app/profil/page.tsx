@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import ProfileSettings from '@/components/ProfileSettings'
 
 export const dynamic = 'force-dynamic'
+export const runtime = 'edge'
 
 export default async function ProfilPage() {
   const supabase = createServerSupabaseClient()
