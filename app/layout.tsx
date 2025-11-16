@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { Providers } from './providers'
+import Footer from '@/components/Footer'
 
 export const metadata: Metadata = {
   title: 'Trouvita - Reconnectons ceux qui se cherchent',
@@ -15,7 +16,10 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <body>
-        <Providers>{children}</Providers>
+        <Providers>
+          {children}
+          <Footer />
+        </Providers>
       </body>
     </html>
   )

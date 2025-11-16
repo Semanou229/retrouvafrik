@@ -19,6 +19,7 @@ import {
   CheckCircle,
   XCircle,
   Loader2,
+  Eye,
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -389,6 +390,13 @@ export default function AdminUsersManager({
                         )}
                       </div>
                       <div className="flex flex-col gap-2 ml-4">
+                        <Link
+                          href={`/admin/utilisateurs/${user.id}`}
+                          className="p-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                          title="Visiter le compte"
+                        >
+                          <Eye className="w-5 h-5" />
+                        </Link>
                         {status === 'active' ? (
                           <>
                             <button
