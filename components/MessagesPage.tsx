@@ -425,12 +425,23 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
 
           {/* Messages */}
           <div className="hidden md:flex flex-1 flex-col">
-            {selectedConversation && currentConversation ? (
+            {selectedConversation ? (
               <>
                 <div className="p-4 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white z-10">
                   <div>
-                    <p className="font-semibold text-lg">{currentConversation.announcementTitle}</p>
-                    <p className="text-sm text-gray-500">{currentConversation.otherUserEmail}</p>
+                    <p className="font-semibold text-lg">
+                      {currentConversation?.announcementTitle || 
+                       (messages.find(m => m.announcement_id === selectedConversation) as any)?.announcement?.title || 
+                       'Annonce'}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {currentConversation?.otherUserEmail || 
+                       (currentConversationMessages.length > 0 
+                         ? (currentConversationMessages[0].sender_id === user?.id 
+                            ? currentConversationMessages[0].recipient?.email 
+                            : currentConversationMessages[0].sender?.email)
+                         : 'Chargement...')}
+                    </p>
                   </div>
                   <LinkIcon
                     className="w-5 h-5 text-gray-400 hover:text-primary cursor-pointer"
