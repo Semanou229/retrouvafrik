@@ -55,7 +55,7 @@ export default function CommentSection({ announcementId, initialComments }: Comm
                 }
               }
               
-              return { ...comment, user: null }
+              return { ...comment, user: undefined }
             } catch (err) {
               console.error('Erreur récupération email:', err)
               // Fallback: utiliser l'email de l'utilisateur actuel si c'est son commentaire
@@ -65,10 +65,10 @@ export default function CommentSection({ announcementId, initialComments }: Comm
                   user: { email: user.email || 'Utilisateur' }
                 }
               }
-              return { ...comment, user: null }
+              return { ...comment, user: undefined }
             }
           }
-          return { ...comment, user: null }
+          return { ...comment, user: undefined }
         })
       )
 
