@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useAuth } from '@/app/providers'
@@ -49,7 +50,7 @@ export default function Navigation() {
   }, [mobileMenuOpen])
 
   return (
-    <>
+    <React.Fragment>
       {/* Publicité header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -595,7 +596,7 @@ export default function Navigation() {
         )}
       </div>
     </nav>
-    </>
+    </React.Fragment>
   )
 }
 
