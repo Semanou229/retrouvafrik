@@ -292,13 +292,8 @@ export default function PerduDeVueForm() {
       {/* Progress bar */}
       <div className="mb-6 md:mb-8">
         {/* Barre de progression mobile avec scroll horizontal */}
-        <div className="block md:hidden overflow-x-auto pb-2 -mx-6 px-6" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-          <style dangerouslySetInnerHTML={{__html: `
-            .mobile-progress::-webkit-scrollbar {
-              display: none;
-            }
-          `}} />
-          <div className="flex gap-3 min-w-max px-2 mobile-progress">
+        <div className="block md:hidden overflow-x-auto pb-2 -mx-6 px-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <div className="flex gap-3 min-w-max px-2">
             {STEPS.map((step) => (
               <div
                 key={step.id}
