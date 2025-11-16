@@ -16,13 +16,20 @@ export async function POST(request: Request) {
     }
 
     // Import dynamique de nodemailer pour éviter les problèmes de build
-    let nodemailer: any
+    let nodemailer: typeof import('nodemailer') | null = null
     try {
       nodemailer = await import('nodemailer')
     } catch (importError) {
       console.error('Erreur lors de l\'import de nodemailer:', importError)
       return NextResponse.json(
         { error: 'Module nodemailer non disponible. Utilisez les Edge Functions Supabase pour l\'envoi d\'emails.' },
+        { status: 503 }
+      )
+    }
+
+    if (!nodemailer) {
+      return NextResponse.json(
+        { error: 'Module nodemailer non disponible.' },
         { status: 503 }
       )
     }
