@@ -1,4 +1,4 @@
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createBrowserClient } from '@supabase/ssr'
 import { createClient } from '@supabase/supabase-js'
 
 export const createSupabaseClient = () => {
@@ -18,10 +18,11 @@ export const createSupabaseClient = () => {
     )
   }
   
-  // Always use client component client when in browser
+  // Always use browser client when in browser
   if (typeof window !== 'undefined') {
     try {
-      return createClientComponentClient()
+      // Utiliser @supabase/ssr pour le navigateur
+      return createBrowserClient(supabaseUrl, supabaseAnonKey)
     } catch (error) {
       // Fallback to direct client creation if helper fails
       return createClient(supabaseUrl, supabaseAnonKey)
@@ -34,4 +35,3 @@ export const createSupabaseClient = () => {
 
 // Don't create instance at module level - let components create it when needed
 // This prevents errors during static page generation
-
