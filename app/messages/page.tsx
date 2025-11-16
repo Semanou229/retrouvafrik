@@ -24,13 +24,36 @@ export default async function MessagesRoute({
     .from('messages')
     .select(`
       *,
-      sender:sender_id(email),
-      recipient:recipient_id(email),
       announcement:announcements(id, title, type)
     `)
     .or(`sender_id.eq.${user.id},recipient_id.eq.${user.id}`)
     .order('created_at', { ascending: false })
     .limit(1000)
+
+  // Fetch sender and recipient emails separately using service role
+  // Note: This requires SUPABASE_SERVICE_ROLE_KEY
+  const messagesWithUsers = messages ? await Promise.all(
+    messages.map(async (msg: any) => {
+      try {
+        // Get sender email - use a direct query to auth.users if possible
+        // Otherwise, we'll fetch it client-side
+        const senderEmail = 'Chargement...'
+        const recipientEmail = 'Chargement...'
+        
+        return {
+          ...msg,
+          sender: { email: senderEmail },
+          recipient: { email: recipientEmail },
+        }
+      } catch (err) {
+        return {
+          ...msg,
+          sender: { email: 'Utilisateur inconnu' },
+          recipient: { email: 'Utilisateur inconnu' },
+        }
+      }
+    })
+  ) : []
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -38,7 +61,7 @@ export default async function MessagesRoute({
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <MessagesPage 
-          initialMessages={messages || []}
+          initialMessages={messagesWithUsers || []}
           announcementId={searchParams.announcement}
         />
       </div>

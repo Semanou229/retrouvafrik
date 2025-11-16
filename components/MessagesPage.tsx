@@ -87,16 +87,18 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
 
   // Get unique conversations with unread count
   const conversationsMap = messages.reduce((acc, msg) => {
-    const otherUserId = msg.sender_id === user?.id ? msg.recipient_id : msg.sender_id
+    if (!msg.announcement_id || !user) return acc
+    
+    const otherUserId = msg.sender_id === user.id ? msg.recipient_id : msg.sender_id
     const key = `${msg.announcement_id}-${otherUserId}`
     
     if (!acc[key]) {
       acc[key] = {
         announcementId: msg.announcement_id,
         otherUserId,
-        otherUserEmail: msg.sender_id === user?.id 
-          ? (msg.recipient?.email || '')
-          : (msg.sender?.email || ''),
+        otherUserEmail: msg.sender_id === user.id 
+          ? (msg.recipient?.email || 'Utilisateur inconnu')
+          : (msg.sender?.email || 'Utilisateur inconnu'),
         lastMessage: msg,
         announcementTitle: (msg as any).announcement?.title || 'Annonce',
         unreadCount: 0,
@@ -109,7 +111,7 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
     }
     
     // Count unread messages
-    if (msg.recipient_id === user?.id && !msg.is_read) {
+    if (msg.recipient_id === user.id && !msg.is_read) {
       acc[key].unreadCount++
     }
     
@@ -117,6 +119,41 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
   }, {} as Record<string, Conversation>)
   
   const conversations: Conversation[] = Object.values(conversationsMap)
+  
+  // If announcementId is provided but no conversation exists, try to fetch announcement info
+  useEffect(() => {
+    if (announcementId && !currentConversation && user) {
+      const fetchAnnouncementInfo = async () => {
+        const { data: announcement } = await supabase
+          .from('announcements')
+          .select('id, title, user_id')
+          .eq('id', announcementId)
+          .single()
+        
+        if (announcement && announcement.user_id !== user.id) {
+          // Create a placeholder conversation for the announcement owner
+          const { data: ownerData } = await supabase.auth.admin.getUserById(announcement.user_id)
+          const ownerEmail = ownerData?.user?.email || 'Utilisateur inconnu'
+          
+          // Find any existing message for this announcement
+          const existingMessage = messages.find(
+            m => m.announcement_id === announcementId && 
+            (m.sender_id === announcement.user_id || m.recipient_id === announcement.user_id)
+          )
+          
+          if (existingMessage) {
+            // Conversation exists, select it
+            setSelectedConversation(announcementId)
+          } else {
+            // No conversation yet, but we can still show the announcement info
+            setSelectedConversation(announcementId)
+          }
+        }
+      }
+      
+      fetchAnnouncementInfo()
+    }
+  }, [announcementId, currentConversation, user, messages, supabase])
 
   const conversationList = conversations.sort((a, b) => 
     new Date(b.lastMessage.created_at).getTime() - new Date(a.lastMessage.created_at).getTime()
