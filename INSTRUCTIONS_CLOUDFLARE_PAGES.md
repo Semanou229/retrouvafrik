@@ -16,15 +16,12 @@ Pour que le site fonctionne sur Cloudflare Pages, vous **DEVEZ** configurer la c
 
 Dans la section **Build configuration**, modifiez la **Build command** :
 
-**Commande actuelle (incorrecte) :**
+**Commande à utiliser (CORRECTE) :**
 ```
-npm ci --legacy-peer-deps || npm install --legacy-peer-deps && npm run build:cloudflare
+npm ci --legacy-peer-deps || npm install --legacy-peer-deps && npm run build:pages
 ```
 
-**Commande à utiliser (correcte) :**
-```
-npm ci --legacy-peer-deps || npm install --legacy-peer-deps && npm run build:cloudflare && npm run pages:build
-```
+⚠️ **IMPORTANT** : Utilisez `npm run build:pages` qui combine automatiquement `build:cloudflare` et `pages:build`.
 
 ⚠️ **IMPORTANT** : La partie `&& npm run pages:build` est **OBLIGATOIRE**. Elle génère les fichiers dans `.vercel/output/static` nécessaires pour Cloudflare Pages.
 
@@ -81,7 +78,7 @@ Et le site devrait être accessible sur `https://retrouvafrik.pages.dev`.
 
 | Paramètre | Valeur |
 |-----------|--------|
-| **Build command** | `npm ci --legacy-peer-deps \|\| npm install --legacy-peer-deps && npm run build:cloudflare && npm run pages:build` |
+| **Build command** | `npm ci --legacy-peer-deps \|\| npm install --legacy-peer-deps && npm run build:pages` |
 | **Build output directory** | `.vercel/output/static` |
 | **Framework preset** | `Next.js` (si disponible) |
 | **Node version** | `18` (automatique) |

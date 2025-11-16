@@ -7,6 +7,7 @@
     "build": "next build",
     "build:cloudflare": "next build && node scripts/clean-build.js",
     "pages:build": "npx @cloudflare/next-on-pages",
+    "build:pages": "npm run build:cloudflare && npm run pages:build",
     "preview": "npx wrangler pages dev .vercel/output/static",
     "start": "next start",
     "lint": "next lint",
