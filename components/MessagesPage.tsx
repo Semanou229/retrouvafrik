@@ -426,9 +426,9 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Messages RetrouvAfrik</h1>
-        <p className="text-sm sm:text-base text-gray-600 hidden sm:block">
+      <div className="flex items-center justify-between gap-2">
+        <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold break-words flex-1 min-w-0">Messages RetrouvAfrik</h1>
+        <p className="text-xs sm:text-sm md:text-base text-gray-600 hidden sm:block flex-shrink-0">
           {conversationList.length} conversation{conversationList.length > 1 ? 's' : ''}
         </p>
       </div>
@@ -619,10 +619,11 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
                     />
                     <button
                       onClick={() => fileInputRef.current?.click()}
-                      className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                      className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex-shrink-0"
                       disabled={isSending}
+                      aria-label="Ajouter une photo"
                     >
-                      <ImageIcon className="w-5 h-5 text-gray-600" />
+                      <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
                     </button>
                     <input
                       type="text"
@@ -635,18 +636,22 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
                         }
                       }}
                       placeholder="Tapez votre message..."
-                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                      className="flex-1 min-w-0 px-2 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                       disabled={isSending}
                     />
                     <button
                       onClick={handleSendMessage}
                       disabled={isSending || (!newMessage.trim() && !selectedPhoto)}
-                      className="bg-primary text-white px-6 py-2 rounded-lg font-semibold hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                      className="bg-primary text-white px-3 sm:px-4 md:px-6 py-2 rounded-lg font-semibold hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-1 sm:gap-2 flex-shrink-0 min-w-[44px] sm:min-w-auto"
+                      aria-label="Envoyer le message"
                     >
                       {isSending ? (
-                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
                       ) : (
-                        <Send className="w-5 h-5" />
+                        <>
+                          <Send className="w-4 h-4 sm:w-5 sm:h-5" />
+                          <span className="hidden md:inline">Envoyer</span>
+                        </>
                       )}
                     </button>
                   </div>
