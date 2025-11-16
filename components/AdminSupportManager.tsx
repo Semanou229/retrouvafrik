@@ -19,6 +19,7 @@ import {
   Loader2,
   ArrowRight,
   Shield,
+  MessageCircle,
 } from 'lucide-react'
 import Link from 'next/link'
 import type { SupportTicket } from '@/lib/types'
