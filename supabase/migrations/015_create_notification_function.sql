@@ -22,7 +22,7 @@ BEGIN
       (unp.notify_on_same_country = TRUE AND unp.city IS NULL)
     )
     -- Exclure l'auteur de l'annonce
-    AND unp.user_id != (SELECT user_id FROM announcements WHERE id = p_announcement_id)
+    AND unp.user_id != (SELECT a.user_id FROM announcements a WHERE a.id = p_announcement_id)
     -- Exclure les utilisateurs qui ont déjà reçu une notification pour cette annonce
     AND NOT EXISTS (
       SELECT 1 FROM announcement_notifications an

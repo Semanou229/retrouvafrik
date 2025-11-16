@@ -88,11 +88,11 @@ CREATE POLICY "Users can create announcements"
 
 CREATE POLICY "Users can update their own announcements"
   ON announcements FOR UPDATE
-  USING (auth.uid() = user_id);
+  USING (auth.uid() = announcements.user_id);
 
 CREATE POLICY "Users can delete their own announcements"
   ON announcements FOR DELETE
-  USING (auth.uid() = user_id);
+  USING (auth.uid() = announcements.user_id);
 
 -- RLS Policies for comments
 CREATE POLICY "Anyone can view comments"
@@ -109,13 +109,13 @@ CREATE POLICY "Users can update their own comments"
 
 CREATE POLICY "Users can delete their own comments"
   ON comments FOR DELETE
-  USING (auth.uid() = user_id);
+  USING (auth.uid() = comments.user_id);
 
 -- RLS Policies for reports
 CREATE POLICY "Users can view their own reports"
   ON reports FOR SELECT
-  USING (auth.uid() = user_id OR auth.uid() IN (
-    SELECT user_id FROM announcements WHERE id = reports.announcement_id
+  USING (auth.uid() = reports.user_id OR auth.uid() IN (
+    SELECT a.user_id FROM announcements a WHERE a.id = reports.announcement_id
   ));
 
 CREATE POLICY "Anyone can create reports"
