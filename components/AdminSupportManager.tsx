@@ -520,6 +520,20 @@ export default function AdminSupportManager({
           </div>
         </div>
       </div>
+
+      {/* Modal de détail du ticket */}
+      {selectedTicket && (
+        <TicketDetailModal
+          ticket={selectedTicket}
+          isOpen={!!selectedTicket}
+          onClose={() => {
+            setSelectedTicket(null)
+            loadTickets()
+          }}
+          isAdmin={true}
+          onUpdate={loadTickets}
+        />
+      )}
     </div>
   )
 }
