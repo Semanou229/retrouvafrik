@@ -12,7 +12,8 @@
     "fix-users": "node scripts/fix-confirmation.js",
     "recreate-users": "node scripts/delete-and-recreate-users.js",
     "create-demo-announcements": "node scripts/create-demo-announcements.js",
-    "deploy:cloudflare": "npm run build && wrangler pages deploy .next --project-name=retrouvafrik"
+    "deploy:cloudflare": "npm run build && wrangler pages deploy .next --project-name=retrouvafrik",
+    "install:cloudflare": "npm install --legacy-peer-deps"
   },
   "dependencies": {
     "next": "^14.0.4",

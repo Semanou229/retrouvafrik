@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-import nodemailer from 'nodemailer'
 
 export async function POST(request: Request) {
   try {
@@ -13,6 +12,18 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: 'Non autorisé' },
         { status: 401 }
+      )
+    }
+
+    // Import dynamique de nodemailer pour éviter les problèmes de build
+    let nodemailer: any
+    try {
+      nodemailer = await import('nodemailer')
+    } catch (importError) {
+      console.error('Erreur lors de l\'import de nodemailer:', importError)
+      return NextResponse.json(
+        { error: 'Module nodemailer non disponible. Utilisez les Edge Functions Supabase pour l\'envoi d\'emails.' },
+        { status: 503 }
       )
     }
 
@@ -35,7 +46,7 @@ export async function POST(request: Request) {
     }
 
     // Créer le transporteur SMTP
-    const transporter = nodemailer.createTransport({
+    const transporter = nodemailer.default.createTransport({
       host: smtpConfig.host,
       port: smtpConfig.port,
       secure: smtpConfig.secure,
