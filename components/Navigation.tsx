@@ -83,21 +83,23 @@ export default function Navigation() {
               Perdu de vue
             </Link>
 
-            {/* Comment ça marche, FAQ, Contact - Visible uniquement si non connecté */}
+            {/* Comment ça marche - Toujours visible */}
+            <Link
+              href="/comment-ca-marche"
+              className={`flex items-center space-x-1 px-2 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
+                isActive('/comment-ca-marche')
+                  ? 'text-primary bg-primary/10'
+                  : 'text-gray-700 hover:text-primary hover:bg-gray-50'
+              }`}
+            >
+              <Info className="w-4 h-4" />
+              <span className="hidden lg:inline">Comment ça marche</span>
+              <span className="lg:hidden">Comment</span>
+            </Link>
+
+            {/* FAQ et Contact - Visible uniquement si non connecté */}
             {!loading && !user && (
               <>
-                <Link
-                  href="/comment-ca-marche"
-                  className={`flex items-center space-x-1 px-2 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
-                    isActive('/comment-ca-marche')
-                      ? 'text-primary bg-primary/10'
-                      : 'text-gray-700 hover:text-primary hover:bg-gray-50'
-                  }`}
-                >
-                  <Info className="w-4 h-4" />
-                  <span className="hidden lg:inline">Comment ça marche</span>
-                  <span className="lg:hidden">Comment</span>
-                </Link>
                 <Link
                   href="/faq"
                   className={`px-2 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
@@ -378,22 +380,24 @@ export default function Navigation() {
                       <span>Perdu de vue</span>
                     </Link>
 
+                    {/* Comment ça marche - Toujours visible */}
+                    <Link
+                      href="/comment-ca-marche"
+                      className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
+                        isActive('/comment-ca-marche')
+                          ? 'bg-primary/10 text-primary'
+                          : 'text-gray-700 hover:bg-gray-100'
+                      }`}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Info className="w-5 h-5" />
+                      <span>Comment ça marche</span>
+                    </Link>
+
                     {/* Section pour utilisateurs non connectés */}
                     {!loading && !user && (
                       <>
-                        {/* Comment ça marche, FAQ, Contact */}
-                        <Link
-                          href="/comment-ca-marche"
-                          className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
-                            isActive('/comment-ca-marche')
-                              ? 'bg-primary/10 text-primary'
-                              : 'text-gray-700 hover:bg-gray-100'
-                          }`}
-                          onClick={() => setMobileMenuOpen(false)}
-                        >
-                          <Info className="w-5 h-5" />
-                          <span>Comment ça marche</span>
-                        </Link>
+                        {/* FAQ et Contact - Visible uniquement si non connecté */}
                         <Link
                           href="/faq"
                           className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
