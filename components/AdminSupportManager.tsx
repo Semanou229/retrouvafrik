@@ -393,9 +393,9 @@ export default function AdminSupportManager({
                           </>
                         )}
                       </div>
-                      {ticket.assigned_admin && (
+                      {ticket.assigned_to && (
                         <div className="mt-2 text-sm text-gray-600">
-                          Assigné à : {ticket.assigned_to ? `ID: ${ticket.assigned_to.substring(0, 8)}...` : 'Non assigné'}
+                          Assigné à : ID: {ticket.assigned_to.substring(0, 8)}...
                         </div>
                       )}
                       {ticket.internal_notes && (
