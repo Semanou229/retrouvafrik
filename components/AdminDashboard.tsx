@@ -187,6 +187,21 @@ export default function AdminDashboard({
         </Link>
 
         <Link
+          href="/admin/publicites"
+          className="bg-white rounded-lg sm:rounded-xl shadow-lg p-4 sm:p-6 border border-gray-100 hover:shadow-xl transition-all hover:border-primary"
+        >
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Globe className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <h3 className="font-semibold text-sm sm:text-base text-gray-900">Publicités</h3>
+              <p className="text-xs sm:text-sm text-gray-600">Gérer les campagnes pub</p>
+            </div>
+          </div>
+        </Link>
+
+        <Link
           href="/admin/contact"
           className="bg-white rounded-lg sm:rounded-xl shadow-lg p-4 sm:p-6 border border-gray-100 hover:shadow-xl transition-all hover:border-primary"
         >

@@ -161,22 +161,21 @@ export default function PerduDeVueForm() {
         throw new Error('L\'annonce n\'a pas pu être créée')
       }
 
-      // Déclencher l'envoi des notifications par email aux membres du secteur
+      // Envoyer un email à l'admin pour approbation
       try {
-        await fetch('/api/notifications/send', {
+        await fetch('/api/admin/notify-announcement', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ announcementId: announcement.id }),
         })
-        // On ne bloque pas la navigation si l'envoi d'emails échoue
       } catch (notificationError) {
-        console.error('Erreur lors de l\'envoi des notifications:', notificationError)
-        // On continue quand même
+        console.error('Erreur lors de l\'envoi de la notification admin:', notificationError)
       }
 
-      router.push(`/annonces/${announcement.id}`)
+      // Rediriger vers une page de confirmation d'attente d'approbation
+      router.push(`/annonces/${announcement.id}?pending=true`)
       router.refresh()
     } catch (err: any) {
       console.error('Form submission error:', err)
