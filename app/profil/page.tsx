@@ -3,6 +3,8 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import ProfileSettings from '@/components/ProfileSettings'
 
+export const dynamic = 'force-dynamic'
+
 export default async function ProfilPage() {
   const supabase = createServerSupabaseClient()
   const {

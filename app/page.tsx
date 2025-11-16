@@ -6,6 +6,8 @@ import { Search, Users, Heart, ArrowRight, CheckCircle, Shield, TrendingUp, Glob
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import AnnouncementCard from '@/components/AnnouncementCard'
 
+export const dynamic = 'force-dynamic'
+
 export default async function HomePage() {
   const supabase = createServerSupabaseClient()
   

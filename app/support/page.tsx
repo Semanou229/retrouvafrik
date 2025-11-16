@@ -3,6 +3,8 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import SupportTicketForm from '@/components/SupportTicketForm'
 
+export const dynamic = 'force-dynamic'
+
 export default async function SupportPage() {
   const supabase = createServerSupabaseClient()
   const {

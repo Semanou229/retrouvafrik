@@ -3,6 +3,8 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import ContactSettingsManager from '@/components/ContactSettingsManager'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminContactPage() {
   const supabase = createServerSupabaseClient()
   const {

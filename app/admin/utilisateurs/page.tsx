@@ -3,6 +3,8 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import AdminUsersManager from '@/components/AdminUsersManager'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminUtilisateursPage() {
   const supabase = createServerSupabaseClient()
   const {

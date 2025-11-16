@@ -4,6 +4,8 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { Heart, Server, Users, Shield, Zap, Globe, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 
+export const dynamic = 'force-dynamic'
+
 export default async function DonPage() {
   const supabase = createServerSupabaseClient()
   

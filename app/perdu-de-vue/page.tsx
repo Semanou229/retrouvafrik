@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { ArrowRight, Heart } from 'lucide-react'
 import AnnouncementCard from '@/components/AnnouncementCard'
 
+export const dynamic = 'force-dynamic'
+
 export default async function PerduDeVuePage() {
   const supabase = createServerSupabaseClient()
   

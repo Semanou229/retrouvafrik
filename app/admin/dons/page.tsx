@@ -3,6 +3,8 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import DonationSettingsManager from '@/components/DonationSettingsManager'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminDonsPage() {
   const supabase = createServerSupabaseClient()
   const {

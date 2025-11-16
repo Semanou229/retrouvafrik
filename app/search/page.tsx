@@ -4,6 +4,8 @@ import SearchForm from '@/components/SearchForm'
 import AnnouncementCard from '@/components/AnnouncementCard'
 import { Search } from 'lucide-react'
 
+export const dynamic = 'force-dynamic'
+
 interface SearchParams {
   type?: string
   urgency?: string

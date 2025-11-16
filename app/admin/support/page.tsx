@@ -3,6 +3,8 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import AdminSupportManager from '@/components/AdminSupportManager'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminSupportPage({
   searchParams,
 }: {

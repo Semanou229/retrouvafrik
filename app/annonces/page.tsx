@@ -2,6 +2,8 @@ import Navigation from '@/components/Navigation'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import AnnouncementsPage from '@/components/AnnouncementsPage'
 
+export const dynamic = 'force-dynamic'
+
 interface SearchParams {
   category?: string
   city?: string

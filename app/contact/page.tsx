@@ -5,6 +5,8 @@ import { Mail, Phone, MapPin, MessageCircle, HelpCircle, Send } from 'lucide-rea
 import Link from 'next/link'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic'
+
 export default async function ContactPage() {
   const supabase = createServerSupabaseClient()
   

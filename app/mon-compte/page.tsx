@@ -5,6 +5,8 @@ import AccountDashboard from '@/components/AccountDashboard'
 import ProfileSettings from '@/components/ProfileSettings'
 import Link from 'next/link'
 
+export const dynamic = 'force-dynamic'
+
 export default async function MonComptePage() {
   const supabase = createServerSupabaseClient()
   const {
