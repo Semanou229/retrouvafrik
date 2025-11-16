@@ -84,7 +84,7 @@ CREATE POLICY "Anyone can view active announcements"
 
 CREATE POLICY "Users can create announcements"
   ON announcements FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+  WITH CHECK (auth.uid() = announcements.user_id);
 
 CREATE POLICY "Users can update their own announcements"
   ON announcements FOR UPDATE
