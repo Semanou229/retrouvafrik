@@ -5,7 +5,8 @@ import { redirect } from 'next/navigation'
 import AdminAnnouncementsManager from '@/components/AdminAnnouncementsManager'
 
 export const dynamic = 'force-dynamic'
-export const runtime = 'edge'
+// Utiliser nodejs runtime pour le client admin avec service role key
+export const runtime = 'nodejs'
 
 export default async function AdminAnnoncesPage({
   searchParams,
@@ -29,46 +30,48 @@ export default async function AdminAnnoncesPage({
     redirect('/mon-compte')
   }
 
-  // Essayer d'utiliser le client admin si disponible, sinon utiliser le client normal
-  // Le client normal devrait fonctionner avec les politiques RLS admin
-  let queryClient = supabase
-  
+  // Utiliser le client admin pour contourner RLS et récupérer toutes les annonces
+  let announcements: any[] = []
+  let queryError: any = null
+
   try {
     const adminSupabase = createAdminSupabaseClient()
-    if (adminSupabase) {
-      queryClient = adminSupabase
+    
+    if (!adminSupabase) {
+      throw new Error('Client admin non disponible. Vérifiez SUPABASE_SERVICE_ROLE_KEY.')
     }
-  } catch (error) {
-    // Si le client admin n'est pas disponible, utiliser le client normal
-    console.warn('Client admin non disponible, utilisation du client normal:', error)
+
+    // Construire la requête
+    let query = adminSupabase
+      .from('announcements')
+      .select('*, user:user_id(email)')
+      .order('created_at', { ascending: false })
+
+    // Appliquer les filtres
+    if (searchParams.status === 'pending') {
+      query = query.eq('approved', false)
+    } else if (searchParams.status === 'hidden') {
+      query = query.eq('hidden', true)
+    } else if (searchParams.status === 'verified') {
+      query = query.eq('verified', true)
+    }
+
+    if (searchParams.search) {
+      query = query.or(`title.ilike.%${searchParams.search}%,description.ilike.%${searchParams.search}%`)
+    }
+
+    const { data, error } = await query.limit(100)
+
+    if (error) {
+      queryError = error
+      console.error('Erreur lors de la récupération des annonces:', error)
+    } else {
+      announcements = data || []
+    }
+  } catch (error: any) {
+    console.error('Erreur lors de la récupération des annonces:', error)
+    queryError = { message: error.message || 'Erreur lors de la récupération' }
   }
-
-  // Construire la requête
-  let query = queryClient
-    .from('announcements')
-    .select('*, user:user_id(email)')
-    .order('created_at', { ascending: false })
-
-  // Appliquer les filtres
-  if (searchParams.status === 'pending') {
-    query = query.eq('approved', false)
-  } else if (searchParams.status === 'hidden') {
-    query = query.eq('hidden', true)
-  } else if (searchParams.status === 'verified') {
-    query = query.eq('verified', true)
-  }
-
-  if (searchParams.search) {
-    query = query.or(`title.ilike.%${searchParams.search}%,description.ilike.%${searchParams.search}%`)
-  }
-
-  const { data: announcements, error: queryError } = await query.limit(100)
-
-  // Log pour déboguer
-  if (queryError) {
-    console.error('Erreur lors de la récupération des annonces:', queryError)
-  }
-  console.log('Annonces récupérées:', announcements?.length || 0)
 
   return (
     <div className="min-h-screen bg-gray-50">
