@@ -17,17 +17,25 @@ export async function POST(request: Request) {
     const supabase = createServerSupabaseClient()
 
     // Récupérer l'annonce
-    const { data: announcement, error: announcementError } = await supabase
+    const { data: announcementData, error: announcementError } = await supabase
       .from('announcements')
-      .select('*')
+      .select('id, title, type, user_id, created_at')
       .eq('id', announcementId)
       .single()
 
-    if (announcementError || !announcement) {
+    if (announcementError || !announcementData) {
       return NextResponse.json(
         { error: 'Annonce non trouvée' },
         { status: 404 }
       )
+    }
+
+    const announcement = announcementData as {
+      id: string
+      title: string
+      type: string
+      user_id: string | null
+      created_at: string
     }
 
     // Récupérer l'email de l'utilisateur si user_id existe
