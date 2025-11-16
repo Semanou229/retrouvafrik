@@ -16,9 +16,9 @@ export async function POST(request: Request) {
     }
 
     // Import dynamique de nodemailer pour éviter les problèmes de build
-    let nodemailer: typeof import('nodemailer') | null = null
+    let nodemailerModule: any = null
     try {
-      nodemailer = await import('nodemailer')
+      nodemailerModule = await import('nodemailer')
     } catch (importError) {
       console.error('Erreur lors de l\'import de nodemailer:', importError)
       return NextResponse.json(
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
       )
     }
 
-    if (!nodemailer) {
+    if (!nodemailerModule) {
       return NextResponse.json(
         { error: 'Module nodemailer non disponible.' },
         { status: 503 }
@@ -53,7 +53,9 @@ export async function POST(request: Request) {
     }
 
     // Créer le transporteur SMTP
-    const transporter = (nodemailer.default || nodemailer).createTransport({
+    // Gérer les deux formats d'import : ES modules (default) et CommonJS
+    const nodemailer = nodemailerModule.default || nodemailerModule
+    const transporter = nodemailer.createTransport({
       host: smtpConfig.host,
       port: smtpConfig.port,
       secure: smtpConfig.secure,
