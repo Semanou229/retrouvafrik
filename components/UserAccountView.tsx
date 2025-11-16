@@ -258,10 +258,21 @@ export default function UserAccountView({
       {/* Messages */}
       <div className="bg-white rounded-xl shadow-lg border border-gray-100">
         <div className="p-4 sm:p-6 border-b border-gray-200">
-          <h2 className="text-xl font-bold flex items-center gap-2">
-            <MessageCircle className="w-5 h-5" />
-            Messages ({messages.length})
-          </h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              <MessageCircle className="w-5 h-5" />
+              Messages ({messages.length})
+            </h2>
+            {isAdminView && messages.length > 0 && (
+              <Link
+                href={`/admin/utilisateurs/${user.id}/messages`}
+                className="text-primary hover:text-primary-dark font-semibold text-sm flex items-center gap-1"
+              >
+                Voir toutes les conversations
+                <ArrowLeft className="w-4 h-4 rotate-180" />
+              </Link>
+            )}
+          </div>
         </div>
         <div className="p-4 sm:p-6">
           {messages.length > 0 ? (
@@ -287,11 +298,27 @@ export default function UserAccountView({
                             </span>
                           </>
                         )}
+                        {message.sender_id && (
+                          <>
+                            <span>•</span>
+                            <span className="text-xs">
+                              {message.sender_id === user.id ? 'De moi' : `De: ${message.sender_id.substring(0, 8)}...`}
+                            </span>
+                          </>
+                        )}
+                        {message.recipient_id && (
+                          <>
+                            <span>•</span>
+                            <span className="text-xs">
+                              {message.recipient_id === user.id ? 'Pour moi' : `Pour: ${message.recipient_id.substring(0, 8)}...`}
+                            </span>
+                          </>
+                        )}
                       </div>
                     </div>
                     {message.announcement && (
                       <Link
-                        href={`/messages?announcement=${message.announcement.id}`}
+                        href={isAdminView ? `/admin/utilisateurs/${user.id}/messages?announcement=${message.announcement.id}` : `/messages?announcement=${message.announcement.id}`}
                         className="ml-4 p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors"
                         title="Voir la conversation"
                       >
