@@ -34,10 +34,10 @@ export default async function AnnouncementPage({
     .update({ views_count: (announcement.views_count || 0) + 1 })
     .eq('id', params.id)
 
-  // Fetch comments
+  // Fetch comments - Les emails seront récupérés côté client
   const { data: comments } = await supabase
     .from('comments')
-    .select('*, user:user_id(email)')
+    .select('*')
     .eq('announcement_id', params.id)
     .order('created_at', { ascending: false })
 

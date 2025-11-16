@@ -27,39 +27,41 @@ export default function AdBanner({ placement, className = '' }: AdBannerProps) {
 
   useEffect(() => {
     const loadCampaign = async () => {
-      const now = new Date().toISOString()
-      
-      const { data: campaigns } = await supabase
-        .from('ad_campaigns')
-        .select('*')
-        .eq('placement', placement)
-        .eq('status', 'active')
-        .lte('start_date', now)
-        .gte('end_date', now)
-        .order('priority', { ascending: false })
-        .limit(1)
-
-      if (campaigns && campaigns.length > 0) {
-        const selectedCampaign = campaigns[0]
+      try {
+        const now = new Date().toISOString()
         
-        // Vérifier les limites d'impressions/clics
-        const { data: stats } = await supabase
-          .from('ad_stats')
-          .select('impressions, clicks')
-          .eq('campaign_id', selectedCampaign.id)
-          .eq('date', new Date().toISOString().split('T')[0])
-          .single()
+        const { data: campaigns } = await supabase
+          .from('ad_campaigns')
+          .select('*')
+          .eq('placement', placement)
+          .eq('status', 'active')
+          .lte('start_date', now)
+          .gte('end_date', now)
+          .order('priority', { ascending: false })
+          .limit(1)
 
-        const todayImpressions = stats?.impressions || 0
-        const todayClicks = stats?.clicks || 0
+        if (campaigns && campaigns.length > 0) {
+          const selectedCampaign = campaigns[0]
+          
+          // Vérifier les limites d'impressions/clics
+          const { data: stats } = await supabase
+            .from('ad_stats')
+            .select('impressions, clicks')
+            .eq('campaign_id', selectedCampaign.id)
+            .eq('date', new Date().toISOString().split('T')[0])
+            .single()
 
-        if (
-          (!selectedCampaign.max_impressions || todayImpressions < selectedCampaign.max_impressions) &&
-          (!selectedCampaign.max_clicks || todayClicks < selectedCampaign.max_clicks)
-        ) {
-          setCampaign(selectedCampaign)
-          // Enregistrer l'impression
-          recordImpression(selectedCampaign.id)
+          const todayImpressions = stats?.impressions || 0
+          const todayClicks = stats?.clicks || 0
+
+          if (
+            (!selectedCampaign.max_impressions || todayImpressions < selectedCampaign.max_impressions) &&
+            (!selectedCampaign.max_clicks || todayClicks < selectedCampaign.max_clicks)
+          ) {
+            setCampaign(selectedCampaign)
+            // Enregistrer l'impression
+            recordImpression(selectedCampaign.id)
+          }
         }
       } catch (err) {
         console.error('Erreur chargement campagne pub:', err)

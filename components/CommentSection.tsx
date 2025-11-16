@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '@/app/providers'
 import { createSupabaseClient } from '@/lib/supabase/client'
 import { format } from 'date-fns'
@@ -17,10 +17,59 @@ interface CommentSectionProps {
 export default function CommentSection({ announcementId, initialComments }: CommentSectionProps) {
   const { user } = useAuth()
   const router = useRouter()
-  const [comments, setComments] = useState(initialComments)
+  const [comments, setComments] = useState<Comment[]>([])
   const [content, setContent] = useState('')
   const [loading, setLoading] = useState(false)
   const supabase = createSupabaseClient()
+
+  // Charger les commentaires avec les emails des utilisateurs
+  useEffect(() => {
+    const loadCommentsWithEmails = async () => {
+      if (!initialComments || initialComments.length === 0) {
+        setComments([])
+        return
+      }
+
+      // Récupérer les emails pour chaque commentaire via une requête directe
+      const commentsWithEmails = await Promise.all(
+        initialComments.map(async (comment) => {
+          if (comment.user_id) {
+            try {
+              // Utiliser une fonction RPC si disponible, sinon récupérer depuis la table auth.users
+              const { data: emailData, error } = await supabase.rpc('get_user_email', {
+                user_id_param: comment.user_id
+              }).catch(() => ({ data: null, error: null }))
+              
+              if (!error && emailData) {
+                return {
+                  ...comment,
+                  user: { email: emailData }
+                }
+              }
+              
+              // Fallback: utiliser l'email de l'utilisateur actuel si c'est son commentaire
+              if (user && user.id === comment.user_id) {
+                return {
+                  ...comment,
+                  user: { email: user.email || 'Utilisateur' }
+                }
+              }
+              
+              return { ...comment, user: null }
+            } catch (err) {
+              console.error('Erreur récupération email:', err)
+              return { ...comment, user: null }
+            }
+          }
+          return { ...comment, user: null }
+        })
+      )
+
+      setComments(commentsWithEmails)
+    }
+
+    loadCommentsWithEmails()
+  }, [initialComments, user, supabase])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -44,15 +93,22 @@ export default function CommentSection({ announcementId, initialComments }: Comm
             content: content.trim(),
           },
         ])
-        .select('*, user:user_id(email)')
+        .select('*')
         .single()
 
       if (error) throw error
 
-      setComments([data, ...comments])
+      // Ajouter l'email de l'utilisateur au commentaire
+      const newComment = {
+        ...data,
+        user: { email: user.email || 'Utilisateur' }
+      }
+
+      setComments([newComment, ...comments])
       setContent('')
     } catch (err) {
       console.error('Error posting comment:', err)
+      alert('Erreur lors de la publication du commentaire. Veuillez réessayer.')
     } finally {
       setLoading(false)
     }
