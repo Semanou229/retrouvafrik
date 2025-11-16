@@ -1,58 +1,68 @@
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
+import { createClient } from '@supabase/supabase-js'
+import { headers } from 'next/headers'
 
-// Version compatible Edge Runtime pour Cloudflare Pages avec @supabase/ssr
+// Version ultra-simplifiée compatible Edge Runtime pour Cloudflare Pages
+// Utilise headers() pour obtenir le token d'authentification depuis les cookies
 export const createServerSupabaseClient = () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    // Retourner un client avec des valeurs par défaut pour éviter les erreurs de build
-    console.warn('Missing Supabase environment variables, using placeholder client')
-    return createServerClient(
+    // Retourner un client placeholder pour éviter les erreurs de build
+    return createClient(
       'https://placeholder.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0',
       {
-        cookies: {
-          getAll() {
-            return []
-          },
-          setAll() {
-            // No-op in Edge Runtime
-          },
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
         },
       }
     )
   }
 
-  // Utiliser @supabase/ssr qui est compatible avec Edge Runtime
-  // Il gère automatiquement les cookies dans Edge Runtime
-  return createServerClient(supabaseUrl, supabaseAnonKey, {
-    cookies: {
-      getAll() {
-        try {
-          const cookieStore = cookies()
-          return cookieStore.getAll().map((cookie) => ({
-            name: cookie.name,
-            value: cookie.value,
-          }))
-        } catch {
-          // Dans Edge Runtime, cookies() peut ne pas être disponible
-          // Retourner un tableau vide, les cookies seront gérés côté client
-          return []
-        }
-      },
-      setAll(cookiesToSet) {
-        try {
-          const cookieStore = cookies()
-          cookiesToSet.forEach(({ name, value, options }) => {
-            cookieStore.set(name, value, options)
-          })
-        } catch {
-          // Dans Edge Runtime, on ne peut pas définir les cookies côté serveur
-          // Ils seront gérés automatiquement côté client
-        }
-      },
+  // Obtenir les headers de la requête pour extraire les cookies
+  let authToken: string | null = null
+  try {
+    const headersList = headers()
+    const cookieHeader = headersList.get('cookie')
+    
+    if (cookieHeader) {
+      // Extraire le token depuis les cookies Supabase
+      const cookies = cookieHeader.split(';').reduce((acc, cookie) => {
+        const [key, value] = cookie.trim().split('=')
+        acc[key] = value
+        return acc
+      }, {} as Record<string, string>)
+      
+      // Supabase stocke le token dans sb-<project-ref>-auth-token
+      const projectRef = supabaseUrl.split('//')[1]?.split('.')[0]
+      if (projectRef) {
+        authToken = cookies[`sb-${projectRef}-auth-token`] || null
+      }
+    }
+  } catch (error) {
+    // Dans Edge Runtime, headers() peut ne pas être disponible
+    // Continuer sans token d'authentification
+  }
+
+  // Créer le client avec le token si disponible
+  const clientOptions: any = {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
     },
-  })
+  }
+
+  // Ajouter le token dans les headers si disponible
+  if (authToken) {
+    clientOptions.global = {
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
+    }
+  }
+
+  return createClient(supabaseUrl, supabaseAnonKey, clientOptions)
 }
