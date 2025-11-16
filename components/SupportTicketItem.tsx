@@ -17,6 +17,7 @@ interface SupportTicketItemProps {
     priority: string
     announcement_id?: string
     created_at: string
+    updated_at: string
     announcement?: { id: string; title: string }
   }
 }
