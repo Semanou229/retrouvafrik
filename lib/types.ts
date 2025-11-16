@@ -45,6 +45,10 @@ export interface Comment {
   user?: {
     email: string
   }
+  announcement?: {
+    id: string
+    title: string
+  }
 }
 
 export interface Report {
@@ -59,6 +63,10 @@ export interface Report {
   contact_phone?: string
   photos?: string[]
   created_at: string
+  announcement?: {
+    id: string
+    title: string
+  }
 }
 
 export interface User {

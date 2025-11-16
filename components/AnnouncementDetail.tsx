@@ -381,9 +381,10 @@ export default function AnnouncementDetail({ announcement, comments: initialComm
                       {announcement.contact_phone}
                     </a>
                     <button
-                      onClick={() => handleCopy(announcement.contact_phone, 'phone')}
+                      onClick={() => announcement.contact_phone && handleCopy(announcement.contact_phone, 'phone')}
                       className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
                       title="Copier"
+                      disabled={!announcement.contact_phone}
                     >
                       {copied === 'phone' ? (
                         <Check className="w-4 h-4 text-green-500" />
@@ -435,7 +436,7 @@ export default function AnnouncementDetail({ announcement, comments: initialComm
                       {whatsAppNumber}
                     </a>
                     <button
-                      onClick={() => handleCopy(whatsAppNumber, 'whatsapp')}
+                      onClick={() => whatsAppNumber && handleCopy(whatsAppNumber, 'whatsapp')}
                       className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
                       title="Copier"
                     >

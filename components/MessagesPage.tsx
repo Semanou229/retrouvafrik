@@ -86,7 +86,7 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
   }, [user, supabase])
 
   // Get unique conversations with unread count
-  const conversations: Conversation[] = messages.reduce((acc, msg) => {
+  const conversationsMap = messages.reduce((acc, msg) => {
     const otherUserId = msg.sender_id === user?.id ? msg.recipient_id : msg.sender_id
     const key = `${msg.announcement_id}-${otherUserId}`
     
@@ -115,8 +115,10 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
     
     return acc
   }, {} as Record<string, Conversation>)
+  
+  const conversations: Conversation[] = Object.values(conversationsMap)
 
-  const conversationList = Object.values(conversations).sort((a, b) => 
+  const conversationList = conversations.sort((a, b) => 
     new Date(b.lastMessage.created_at).getTime() - new Date(a.lastMessage.created_at).getTime()
   )
 
