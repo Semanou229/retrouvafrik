@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
 
-// Note: Cette route ne peut pas utiliser Edge Runtime car nodemailer nécessite des modules Node.js natifs
-// (stream, fs, path, crypto) qui ne sont pas disponibles dans Edge Runtime
-// export const runtime = 'edge' // Désactivé pour cette route
+// Note: Cette route utilise Edge Runtime compatible avec Cloudflare Pages
+// Pour l'envoi d'emails, nous utilisons Resend API (compatible Edge Runtime)
+// ou une Edge Function Supabase
+export const runtime = 'edge'
 
 export async function POST(request: Request) {
   try {
@@ -19,74 +20,94 @@ export async function POST(request: Request) {
       )
     }
 
-    // Import dynamique de nodemailer pour éviter les problèmes de build
-    let nodemailerModule: any = null
-    try {
-      nodemailerModule = await import('nodemailer')
-    } catch (importError) {
-      console.error('Erreur lors de l\'import de nodemailer:', importError)
-      return NextResponse.json(
-        { error: 'Module nodemailer non disponible. Utilisez les Edge Functions Supabase pour l\'envoi d\'emails.' },
-        { status: 503 }
-      )
+    // Option 1: Utiliser Resend API (compatible Edge Runtime)
+    const resendApiKey = process.env.RESEND_API_KEY
+    if (resendApiKey) {
+      try {
+        const resendResponse = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${resendApiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            from: email.from || `${process.env.SMTP_FROM_NAME || 'RetrouvAfrik'} <${process.env.SMTP_FROM || 'noreply@retrouvafrik.com'}>`,
+            to: email.to,
+            subject: email.subject,
+            html: email.html,
+          }),
+        })
+
+        if (!resendResponse.ok) {
+          const errorData = await resendResponse.json().catch(() => ({}))
+          throw new Error(errorData.message || 'Erreur Resend API')
+        }
+
+        const result = await resendResponse.json()
+        return NextResponse.json({
+          success: true,
+          messageId: result.id,
+          provider: 'resend',
+        })
+      } catch (resendError: any) {
+        console.error('Erreur Resend:', resendError)
+        // Continuer avec l'option 2 si Resend échoue
+      }
     }
 
-    if (!nodemailerModule) {
-      return NextResponse.json(
-        { error: 'Module nodemailer non disponible.' },
-        { status: 503 }
-      )
+    // Option 2: Utiliser Supabase Edge Function pour l'envoi SMTP
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+    if (supabaseUrl && supabaseAnonKey) {
+      try {
+        // Appeler une Edge Function Supabase qui gère l'envoi SMTP
+        // Note: Vous devrez créer cette Edge Function dans Supabase
+        const functionUrl = `${supabaseUrl}/functions/v1/send-email`
+        const response = await fetch(functionUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${supabaseAnonKey}`,
+          },
+          body: JSON.stringify({
+            to: email.to,
+            subject: email.subject,
+            html: email.html,
+            from: email.from || `${process.env.SMTP_FROM_NAME || 'RetrouvAfrik'} <${process.env.SMTP_FROM || 'noreply@retrouvafrik.com'}>`,
+          }),
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}))
+          throw new Error(errorData.error || 'Erreur Edge Function')
+        }
+
+        const result = await response.json()
+        return NextResponse.json({
+          success: true,
+          messageId: result.messageId,
+          provider: 'supabase-edge-function',
+        })
+      } catch (supabaseError: any) {
+        console.error('Erreur Supabase Edge Function:', supabaseError)
+        // Continuer avec l'option 3 si Supabase échoue
+      }
     }
 
-    // Configuration SMTP depuis les variables d'environnement ou les paramètres
-    const smtpConfig = {
-      host: smtp?.host || process.env.SMTP_HOST,
-      port: parseInt(smtp?.port || process.env.SMTP_PORT || '587'),
-      secure: smtp?.secure || process.env.SMTP_SECURE === 'true', // true pour port 465
-      auth: {
-        user: smtp?.user || process.env.SMTP_USER,
-        pass: smtp?.password || process.env.SMTP_PASSWORD,
+    // Option 3: Retourner une erreur si aucune option n'est disponible
+    return NextResponse.json(
+      {
+        error: 'Aucun service d\'envoi d\'email configuré. Configurez RESEND_API_KEY ou créez une Edge Function Supabase pour l\'envoi SMTP.',
+        hint: 'Pour utiliser Resend: ajoutez RESEND_API_KEY dans vos variables d\'environnement. Pour utiliser SMTP via Supabase: créez une Edge Function dans supabase/functions/send-email/',
       },
-    }
-
-    if (!smtpConfig.host || !smtpConfig.auth.user || !smtpConfig.auth.pass) {
-      return NextResponse.json(
-        { error: 'Configuration SMTP manquante' },
-        { status: 400 }
-      )
-    }
-
-    // Créer le transporteur SMTP
-    // Gérer les deux formats d'import : ES modules (default) et CommonJS
-    const nodemailer = nodemailerModule.default || nodemailerModule
-    const transporter = nodemailer.createTransport({
-      host: smtpConfig.host,
-      port: smtpConfig.port,
-      secure: smtpConfig.secure,
-      auth: smtpConfig.auth,
-    })
-
-    // Vérifier la connexion SMTP
-    await transporter.verify()
-
-    // Envoyer l'email
-    const info = await transporter.sendMail({
-      from: email.from || `${process.env.SMTP_FROM_NAME || 'RetrouvAfrik'} <${process.env.SMTP_FROM || smtpConfig.auth.user}>`,
-      to: email.to,
-      subject: email.subject,
-      html: email.html,
-    })
-
-    return NextResponse.json({
-      success: true,
-      messageId: info.messageId,
-    })
+      { status: 503 }
+    )
   } catch (error: any) {
-    console.error('Erreur SMTP:', error)
+    console.error('Erreur API SMTP:', error)
     return NextResponse.json(
       { error: error.message || 'Erreur lors de l\'envoi de l\'email' },
       { status: 500 }
     )
   }
 }
-
