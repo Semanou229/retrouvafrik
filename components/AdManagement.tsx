@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createSupabaseClient } from '@/lib/supabase/client'
+import { useAuth } from '@/app/providers'
 import {
   Globe,
   Plus,
@@ -19,9 +20,12 @@ import {
   AlertCircle,
   FileText,
   BarChart3,
+  Upload,
+  Image as ImageIcon,
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
+import Image from 'next/image'
 
 interface AdRequest {
   id: string
@@ -80,6 +84,7 @@ export default function AdManagement({
 }: AdManagementProps) {
   const router = useRouter()
   const supabase = createSupabaseClient()
+  const { user } = useAuth()
   const [activeTab, setActiveTab] = useState<'requests' | 'campaigns' | 'create'>('requests')
   const [adRequests, setAdRequests] = useState<AdRequest[]>(initialAdRequests)
   const [campaigns, setCampaigns] = useState<AdCampaign[]>(initialCampaigns)
@@ -88,6 +93,9 @@ export default function AdManagement({
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showStatsModal, setShowStatsModal] = useState(false)
   const [campaignStats, setCampaignStats] = useState<any>(null)
+  const [uploadingImage, setUploadingImage] = useState(false)
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
 
   // Formulaire de création de campagne
   const [campaignForm, setCampaignForm] = useState({
@@ -104,6 +112,62 @@ export default function AdManagement({
     max_clicks: '',
     priority: 0,
   })
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert('L\'image est trop grande. Taille maximale : 5 MB')
+        return
+      }
+      if (!file.type.startsWith('image/')) {
+        alert('Veuillez sélectionner une image valide')
+        return
+      }
+      setImageFile(file)
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const uploadImage = async (): Promise<string | null> => {
+    if (!imageFile) return null
+
+    setUploadingImage(true)
+    try {
+      const fileExt = imageFile.name.split('.').pop()
+      const fileName = `ads/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
+      
+      const { error: uploadError } = await supabase.storage
+        .from('photos')
+        .upload(fileName, imageFile, {
+          cacheControl: '3600',
+          upsert: false
+        })
+
+      if (uploadError) {
+        console.error('Upload error:', uploadError)
+        throw uploadError
+      }
+
+      const { data: urlData } = supabase.storage
+        .from('photos')
+        .getPublicUrl(fileName)
+
+      if (urlData?.publicUrl) {
+        return urlData.publicUrl
+      }
+      return null
+    } catch (error) {
+      console.error('Error uploading image:', error)
+      throw error
+    } finally {
+      setUploadingImage(false)
+    }
+  }
 
   const updateRequestStatus = async (id: string, status: AdRequest['status'], notes?: string) => {
     const { error } = await supabase
@@ -124,47 +188,64 @@ export default function AdManagement({
       return
     }
 
-    const campaignData = {
-      title: campaignForm.title,
-      description: campaignForm.description || null,
-      advertiser_name: campaignForm.advertiser_name,
-      advertiser_email: campaignForm.advertiser_email,
-      ad_url: campaignForm.ad_url,
-      image_url: campaignForm.image_url || null,
-      placement: campaignForm.placement,
-      start_date: campaignForm.start_date,
-      end_date: campaignForm.end_date,
-      max_impressions: campaignForm.max_impressions ? parseInt(campaignForm.max_impressions) : null,
-      max_clicks: campaignForm.max_clicks ? parseInt(campaignForm.max_clicks) : null,
-      priority: campaignForm.priority,
-      status: 'active' as const,
-    }
+    try {
+      // Upload image si fournie
+      let imageUrl = campaignForm.image_url || null
+      if (imageFile) {
+        imageUrl = await uploadImage()
+        if (!imageUrl) {
+          alert('Erreur lors de l\'upload de l\'image')
+          return
+        }
+      }
 
-    const { data, error } = await supabase
-      .from('ad_campaigns')
-      .insert([campaignData])
-      .select()
-      .single()
+      const campaignData = {
+        title: campaignForm.title,
+        description: campaignForm.description || null,
+        advertiser_name: campaignForm.advertiser_name,
+        advertiser_email: campaignForm.advertiser_email,
+        ad_url: campaignForm.ad_url,
+        image_url: imageUrl,
+        placement: campaignForm.placement,
+        start_date: campaignForm.start_date,
+        end_date: campaignForm.end_date,
+        max_impressions: campaignForm.max_impressions ? parseInt(campaignForm.max_impressions) : null,
+        max_clicks: campaignForm.max_clicks ? parseInt(campaignForm.max_clicks) : null,
+        priority: campaignForm.priority,
+        status: 'active' as const,
+      }
 
-    if (!error && data) {
-      setCampaigns((prev) => [data, ...prev])
-      setShowCreateModal(false)
-      setCampaignForm({
-        title: '',
-        description: '',
-        advertiser_name: '',
-        advertiser_email: '',
-        ad_url: '',
-        image_url: '',
-        placement: 'sidebar',
-        start_date: '',
-        end_date: '',
-        max_impressions: '',
-        max_clicks: '',
-        priority: 0,
-      })
-      router.refresh()
-    } else {
+      const { data, error } = await supabase
+        .from('ad_campaigns')
+        .insert([campaignData])
+        .select()
+        .single()
+
+      if (!error && data) {
+        setCampaigns((prev) => [data, ...prev])
+        setShowCreateModal(false)
+        setImageFile(null)
+        setImagePreview(null)
+        setCampaignForm({
+          title: '',
+          description: '',
+          advertiser_name: '',
+          advertiser_email: '',
+          ad_url: '',
+          image_url: '',
+          placement: 'sidebar',
+          start_date: '',
+          end_date: '',
+          max_impressions: '',
+          max_clicks: '',
+          priority: 0,
+        })
+        router.refresh()
+      } else {
+        alert('Erreur lors de la création de la campagne: ' + (error?.message || 'Erreur inconnue'))
+      }
+    } catch (error: any) {
+      console.error('Error creating campaign:', error)
       alert('Erreur lors de la création de la campagne: ' + (error?.message || 'Erreur inconnue'))
     }
   }
@@ -553,14 +634,72 @@ export default function AdManagement({
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">URL de l'image (optionnel)</label>
-                <input
-                  type="url"
-                  value={campaignForm.image_url}
-                  onChange={(e) => setCampaignForm({ ...campaignForm, image_url: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                  placeholder="https://exemple.com/image.jpg"
-                />
+                <label className="block text-sm font-medium text-gray-700 mb-2">Visuel de la campagne</label>
+                <div className="space-y-3">
+                  {/* Upload d'image */}
+                  <div>
+                    <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
+                      {imagePreview ? (
+                        <div className="relative w-full h-full">
+                          <Image
+                            src={imagePreview}
+                            alt="Aperçu"
+                            fill
+                            className="object-contain rounded-lg"
+                            unoptimized
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setImageFile(null)
+                              setImagePreview(null)
+                            }}
+                            className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                          <Upload className="w-8 h-8 mb-2 text-gray-400" />
+                          <p className="mb-2 text-sm text-gray-500">
+                            <span className="font-semibold">Cliquez pour uploader</span> ou glissez-déposez
+                          </p>
+                          <p className="text-xs text-gray-500">PNG, JPG, GIF jusqu'à 5MB</p>
+                        </div>
+                      )}
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept="image/*"
+                        onChange={handleImageSelect}
+                        disabled={uploadingImage}
+                      />
+                    </label>
+                  </div>
+                  
+                  {/* Ou URL */}
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-gray-300"></div>
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                      <span className="px-2 bg-white text-gray-500">OU</span>
+                    </div>
+                  </div>
+                  
+                  <input
+                    type="url"
+                    value={campaignForm.image_url}
+                    onChange={(e) => setCampaignForm({ ...campaignForm, image_url: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="https://exemple.com/image.jpg"
+                    disabled={!!imageFile}
+                  />
+                </div>
+                {uploadingImage && (
+                  <p className="mt-2 text-sm text-gray-600">Upload en cours...</p>
+                )}
               </div>
               <div className="grid md:grid-cols-3 gap-4">
                 <div>
