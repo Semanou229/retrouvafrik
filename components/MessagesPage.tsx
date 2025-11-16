@@ -480,7 +480,7 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
           </div>
 
           {/* Messages - Mobile: visible when conversation selected, Desktop: always visible */}
-          <div className={`${selectedConversation ? 'flex' : 'hidden'} md:flex flex-1 flex-col`}>
+          <div className={`${selectedConversation ? 'flex' : 'hidden'} md:flex flex-1 flex-col overflow-hidden`}>
             {selectedConversation ? (
               <>
                 <div className="p-3 sm:p-4 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white z-10">
@@ -493,13 +493,13 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
                     >
                       <ArrowLeft className="w-5 h-5 text-gray-600" />
                     </button>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm sm:text-base lg:text-lg truncate">
+                    <div className="flex-1 min-w-0 pr-2">
+                      <p className="font-semibold text-sm sm:text-base lg:text-lg line-clamp-2 break-words">
                         {currentConversation?.announcementTitle || 
                          (messages.find(m => m.announcement_id === selectedConversation) as any)?.announcement?.title || 
                          'Annonce'}
                       </p>
-                      <p className="text-xs sm:text-sm text-gray-500 truncate">
+                      <p className="text-xs sm:text-sm text-gray-500 truncate mt-0.5">
                         {currentConversation?.otherUserEmail || 
                          (currentConversationMessages.length > 0 
                            ? (currentConversationMessages[0].sender_id === user?.id 
@@ -589,7 +589,7 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
                 </div>
 
                 {/* Input */}
-                <div className="p-2 sm:p-4 border-t border-gray-200 bg-white sticky bottom-0 z-10">
+                <div className="p-2 sm:p-4 border-t border-gray-200 bg-white flex-shrink-0">
                   {photoPreview && (
                     <div className="mb-2 sm:mb-3 relative inline-block">
                       <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-lg overflow-hidden border-2 border-primary">
@@ -609,7 +609,7 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
                       </button>
                     </div>
                   )}
-                  <div className="flex gap-1 sm:gap-2">
+                  <div className="flex gap-1.5 sm:gap-2 items-center">
                     <input
                       type="file"
                       ref={fileInputRef}
@@ -642,17 +642,15 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
                     <button
                       onClick={handleSendMessage}
                       disabled={isSending || (!newMessage.trim() && !selectedPhoto)}
-                      className="bg-primary text-white px-3 sm:px-4 md:px-6 py-2 rounded-lg font-semibold hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-1 sm:gap-2 flex-shrink-0 min-w-[44px] sm:min-w-auto"
+                      className="bg-primary text-white px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg font-semibold hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center flex-shrink-0 min-w-[44px] h-[44px] sm:h-auto sm:min-w-auto"
                       aria-label="Envoyer le message"
                     >
                       {isSending ? (
-                        <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
+                        <Loader2 className="w-5 h-5 animate-spin" />
                       ) : (
-                        <>
-                          <Send className="w-4 h-4 sm:w-5 sm:h-5" />
-                          <span className="hidden md:inline">Envoyer</span>
-                        </>
+                        <Send className="w-5 h-5" />
                       )}
+                      <span className="hidden md:inline ml-1.5">Envoyer</span>
                     </button>
                   </div>
                 </div>
