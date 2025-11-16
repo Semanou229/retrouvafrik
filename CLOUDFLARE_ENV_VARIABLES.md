@@ -1,5 +1,18 @@
 # Configuration des Variables d'Environnement sur Cloudflare Pages
 
+## Commande de Build
+
+**IMPORTANT** : Utilisez la commande de build suivante dans Cloudflare Pages :
+
+```
+npm ci --legacy-peer-deps || npm install --legacy-peer-deps && npm run build:cloudflare
+```
+
+Cette commande :
+1. Installe les dépendances avec `--legacy-peer-deps`
+2. Lance le build Next.js
+3. Nettoie automatiquement le cache webpack (qui peut dépasser 25 MiB par fichier)
+
 ## Variables Requises
 
 Pour que le projet fonctionne correctement sur Cloudflare Pages, vous devez configurer les variables d'environnement suivantes dans le dashboard Cloudflare Pages :

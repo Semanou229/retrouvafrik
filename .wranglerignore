@@ -1,0 +1,16 @@
+# Fichiers et dossiers à ignorer lors du déploiement sur Cloudflare Pages
+
+# Cache webpack (trop volumineux pour Cloudflare Pages - limite 25 MiB par fichier)
+.next/cache/webpack/
+
+# Cache de développement
+.next/cache/client-development/
+.next/cache/client-development-fallback/
+.next/cache/server-development/
+
+# Fichiers de trace
+.next/trace
+
+# Types TypeScript (non nécessaires en production)
+.next/types/
+
