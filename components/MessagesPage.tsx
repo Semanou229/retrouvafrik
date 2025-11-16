@@ -225,6 +225,12 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
   
   const conversations: Conversation[] = Object.values(conversationsMap)
   
+  const conversationList = conversations.sort((a, b) => 
+    new Date(b.lastMessage.created_at).getTime() - new Date(a.lastMessage.created_at).getTime()
+  )
+
+  const currentConversation = conversationList.find(c => c.announcementId === selectedConversation)
+  
   // If announcementId is provided but no conversation exists, try to fetch announcement info
   useEffect(() => {
     if (announcementId && !currentConversation && user) {
@@ -236,10 +242,6 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
           .single()
         
         if (announcement && announcement.user_id !== user.id) {
-          // Create a placeholder conversation for the announcement owner
-          const { data: ownerData } = await supabase.auth.admin.getUserById(announcement.user_id)
-          const ownerEmail = ownerData?.user?.email || 'Utilisateur inconnu'
-          
           // Find any existing message for this announcement
           const existingMessage = messages.find(
             m => m.announcement_id === announcementId && 
@@ -258,13 +260,7 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
       
       fetchAnnouncementInfo()
     }
-  }, [announcementId, currentConversation, user, messages, supabase])
-
-  const conversationList = conversations.sort((a, b) => 
-    new Date(b.lastMessage.created_at).getTime() - new Date(a.lastMessage.created_at).getTime()
-  )
-
-  const currentConversation = conversationList.find(c => c.announcementId === selectedConversation)
+  }, [announcementId, currentConversation, user, messages, supabase, selectedConversation])
   
   // Get messages for the selected conversation
   const currentConversationMessages = selectedConversation
