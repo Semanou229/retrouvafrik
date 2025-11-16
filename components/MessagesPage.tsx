@@ -434,7 +434,7 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
       </div>
 
       <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
-        <div className="flex h-[calc(100vh-250px)] sm:h-[600px] md:h-[700px]">
+        <div className="flex h-[calc(100vh-200px)] sm:h-[600px] md:h-[700px]">
           {/* Conversations list - Mobile: hidden when conversation selected, Desktop: always visible */}
           <div className={`${selectedConversation ? 'hidden' : 'flex'} md:flex w-full md:w-1/3 border-r border-gray-200 overflow-y-auto flex-col`}>
             <div className="p-4 border-b border-gray-200 sticky top-0 bg-white z-10">
@@ -589,7 +589,7 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
                 </div>
 
                 {/* Input */}
-                <div className="p-2 sm:p-4 border-t border-gray-200 bg-white">
+                <div className="p-2 sm:p-4 border-t border-gray-200 bg-white sticky bottom-0 z-10">
                   {photoPreview && (
                     <div className="mb-2 sm:mb-3 relative inline-block">
                       <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-lg overflow-hidden border-2 border-primary">
