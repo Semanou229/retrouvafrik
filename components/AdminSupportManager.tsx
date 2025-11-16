@@ -61,7 +61,7 @@ export default function AdminSupportManager({
         t =>
           t.subject.toLowerCase().includes(query) ||
           t.description.toLowerCase().includes(query) ||
-          (t.user as any)?.email?.toLowerCase().includes(query)
+          (t.user_id || '').toLowerCase().includes(query)
       )
     }
 
@@ -371,7 +371,7 @@ export default function AdminSupportManager({
                       <div className="flex items-center gap-4 text-sm text-gray-500">
                         <div className="flex items-center gap-1">
                           <User className="w-4 h-4" />
-                          <span>{(ticket.user as any)?.email || 'Utilisateur anonyme'}</span>
+                          <span>{ticket.user_id ? `ID: ${ticket.user_id.substring(0, 8)}...` : 'Utilisateur anonyme'}</span>
                         </div>
                         <span>•</span>
                         <div className="flex items-center gap-1">
@@ -395,7 +395,7 @@ export default function AdminSupportManager({
                       </div>
                       {ticket.assigned_admin && (
                         <div className="mt-2 text-sm text-gray-600">
-                          Assigné à : {(ticket.assigned_admin as any)?.email}
+                          Assigné à : {ticket.assigned_to ? `ID: ${ticket.assigned_to.substring(0, 8)}...` : 'Non assigné'}
                         </div>
                       )}
                       {ticket.internal_notes && (

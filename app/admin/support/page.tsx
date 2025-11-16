@@ -29,12 +29,12 @@ export default async function AdminSupportPage({
   }
 
   // Construire la requête
+  // Note: On ne peut pas utiliser les relations user:user_id(email) car user_id est une référence à auth.users
+  // On récupère juste les tickets, les emails seront récupérés côté client si nécessaire
   let query = supabase
     .from('support_tickets')
     .select(`
       *,
-      user:user_id(email),
-      assigned_admin:assigned_to(email),
       announcement:announcements(id, title)
     `)
     .order('created_at', { ascending: false })
