@@ -40,6 +40,61 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
   const [uploadingPhoto, setUploadingPhoto] = useState(false)
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
   const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null)
+  const [loadingEmails, setLoadingEmails] = useState(true)
+
+  // Load user emails for messages that don't have them yet
+  useEffect(() => {
+    const loadUserEmails = async () => {
+      if (!user || messages.length === 0) {
+        setLoadingEmails(false)
+        return
+      }
+
+      const messagesNeedingEmails = messages.filter(
+        msg => !msg.sender?.email || msg.sender.email === 'Chargement...' ||
+                !msg.recipient?.email || msg.recipient.email === 'Chargement...'
+      )
+
+      if (messagesNeedingEmails.length === 0) {
+        setLoadingEmails(false)
+        return
+      }
+
+      const messagesWithEmails = await Promise.all(
+        messages.map(async (msg) => {
+          // If emails are already loaded, skip
+          if (msg.sender?.email && msg.sender.email !== 'Chargement...' && 
+              msg.recipient?.email && msg.recipient.email !== 'Chargement...') {
+            return msg
+          }
+
+          try {
+            // Fetch emails using RPC function
+            const { data: senderEmail } = await supabase.rpc('get_user_email', { user_id: msg.sender_id })
+            const { data: recipientEmail } = await supabase.rpc('get_user_email', { user_id: msg.recipient_id })
+            
+            return {
+              ...msg,
+              sender: { email: senderEmail || 'Utilisateur inconnu' },
+              recipient: { email: recipientEmail || 'Utilisateur inconnu' },
+            }
+          } catch (err) {
+            console.error('Error loading emails:', err)
+            return {
+              ...msg,
+              sender: { email: msg.sender?.email || 'Utilisateur inconnu' },
+              recipient: { email: msg.recipient?.email || 'Utilisateur inconnu' },
+            }
+          }
+        })
+      )
+
+      setMessages(messagesWithEmails)
+      setLoadingEmails(false)
+    }
+
+    loadUserEmails()
+  }, [user, supabase])
 
   // Scroll to bottom when new messages arrive
   useEffect(() => {
