@@ -13,11 +13,11 @@ export default async function DonPage() {
   // Récupérer les paramètres de don actifs
   const { data: donationSettings } = await supabase
     .from('donation_settings')
-    .select('*')
+    .select('id, title, description, donation_url, is_active')
     .eq('is_active', true)
     .order('created_at', { ascending: false })
     .limit(1)
-    .single()
+    .maybeSingle()
 
   const donationUrl = donationSettings?.donation_url || '#'
   const donationTitle = donationSettings?.title || 'Faites un don'

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/app/providers'
 import { useForm } from 'react-hook-form'
@@ -39,6 +39,8 @@ export default function PerduDeVueForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const supabase = createSupabaseClient()
+  const progressBarRef = useRef<HTMLDivElement>(null)
+  const stepRefs = useRef<(HTMLDivElement | null)[]>([])
 
   const {
     register,
@@ -194,6 +196,26 @@ export default function PerduDeVueForm() {
     }
   }
 
+  // Effet pour scroller automatiquement vers l'étape actuelle sur mobile
+  useEffect(() => {
+    if (progressBarRef.current && stepRefs.current[currentStep - 1]) {
+      const stepElement = stepRefs.current[currentStep - 1]
+      const container = progressBarRef.current
+      
+      if (stepElement) {
+        const stepLeft = stepElement.offsetLeft
+        const stepWidth = stepElement.offsetWidth
+        const containerWidth = container.offsetWidth
+        const scrollLeft = stepLeft - (containerWidth / 2) + (stepWidth / 2)
+        
+        container.scrollTo({
+          left: Math.max(0, scrollLeft),
+          behavior: 'smooth'
+        })
+      }
+    }
+  }, [currentStep])
+
   const onSubmit = async (data: FormData) => {
     if (currentStep < 5) {
       // Ne devrait pas arriver ici car handleNext gère la navigation
@@ -292,11 +314,15 @@ export default function PerduDeVueForm() {
       <div className="mb-6 md:mb-8">
         {/* Barre de progression mobile avec scroll horizontal */}
         <div className="block md:hidden">
-          <div className="overflow-x-auto pb-2 -mx-6 px-6 scrollbar-hide">
+          <div 
+            ref={progressBarRef}
+            className="overflow-x-auto pb-2 -mx-6 px-6 scrollbar-hide scroll-smooth"
+          >
             <div className="flex gap-2 min-w-max">
-              {STEPS.map((step) => (
+              {STEPS.map((step, index) => (
                 <div
                   key={step.id}
+                  ref={(el) => { stepRefs.current[index] = el }}
                   className="flex-shrink-0 w-20"
                 >
                   <div

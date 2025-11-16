@@ -40,12 +40,12 @@ export default function DonationSettingsManager() {
         .select('*')
         .order('created_at', { ascending: false })
         .limit(1)
-        .single()
+        .maybeSingle()
 
-      if (error && error.code !== 'PGRST116') {
-        // PGRST116 = no rows returned, which is OK for first time
+      if (error) {
         console.error('Error loading settings:', error)
-        setError('Erreur lors du chargement des paramètres')
+        setError('Erreur lors du chargement des paramètres: ' + error.message)
+        setLoading(false)
         return
       }
 
@@ -58,7 +58,7 @@ export default function DonationSettingsManager() {
       }
     } catch (err: any) {
       console.error('Error:', err)
-      setError('Erreur lors du chargement')
+      setError('Erreur lors du chargement: ' + (err.message || 'Erreur inconnue'))
     } finally {
       setLoading(false)
     }
