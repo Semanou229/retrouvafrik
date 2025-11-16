@@ -91,6 +91,8 @@ export default function AdManagement({
   const [selectedRequest, setSelectedRequest] = useState<AdRequest | null>(null)
   const [selectedCampaign, setSelectedCampaign] = useState<AdCampaign | null>(null)
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [editingCampaign, setEditingCampaign] = useState<AdCampaign | null>(null)
   const [showStatsModal, setShowStatsModal] = useState(false)
   const [campaignStats, setCampaignStats] = useState<any>(null)
   const [uploadingImage, setUploadingImage] = useState(false)
@@ -182,6 +184,46 @@ export default function AdManagement({
     }
   }
 
+  const resetForm = () => {
+    setImageFile(null)
+    setImagePreview(null)
+    setEditingCampaign(null)
+    setCampaignForm({
+      title: '',
+      description: '',
+      advertiser_name: '',
+      advertiser_email: '',
+      ad_url: '',
+      image_url: '',
+      placement: 'sidebar',
+      start_date: '',
+      end_date: '',
+      max_impressions: '',
+      max_clicks: '',
+      priority: 0,
+    })
+  }
+
+  const openEditModal = (campaign: AdCampaign) => {
+    setEditingCampaign(campaign)
+    setCampaignForm({
+      title: campaign.title,
+      description: campaign.description || '',
+      advertiser_name: campaign.advertiser_name,
+      advertiser_email: campaign.advertiser_email,
+      ad_url: campaign.ad_url,
+      image_url: campaign.image_url || '',
+      placement: campaign.placement,
+      start_date: campaign.start_date.split('T')[0],
+      end_date: campaign.end_date.split('T')[0],
+      max_impressions: campaign.max_impressions?.toString() || '',
+      max_clicks: campaign.max_clicks?.toString() || '',
+      priority: campaign.priority,
+    })
+    setImagePreview(campaign.image_url || null)
+    setShowEditModal(true)
+  }
+
   const createCampaign = async () => {
     if (!campaignForm.title || !campaignForm.advertiser_email || !campaignForm.ad_url) {
       alert('Veuillez remplir tous les champs obligatoires')
@@ -224,22 +266,7 @@ export default function AdManagement({
       if (!error && data) {
         setCampaigns((prev) => [data, ...prev])
         setShowCreateModal(false)
-        setImageFile(null)
-        setImagePreview(null)
-        setCampaignForm({
-          title: '',
-          description: '',
-          advertiser_name: '',
-          advertiser_email: '',
-          ad_url: '',
-          image_url: '',
-          placement: 'sidebar',
-          start_date: '',
-          end_date: '',
-          max_impressions: '',
-          max_clicks: '',
-          priority: 0,
-        })
+        resetForm()
         router.refresh()
       } else {
         alert('Erreur lors de la création de la campagne: ' + (error?.message || 'Erreur inconnue'))
@@ -247,6 +274,61 @@ export default function AdManagement({
     } catch (error: any) {
       console.error('Error creating campaign:', error)
       alert('Erreur lors de la création de la campagne: ' + (error?.message || 'Erreur inconnue'))
+    }
+  }
+
+  const updateCampaign = async () => {
+    if (!editingCampaign) return
+    
+    if (!campaignForm.title || !campaignForm.advertiser_email || !campaignForm.ad_url) {
+      alert('Veuillez remplir tous les champs obligatoires')
+      return
+    }
+
+    try {
+      // Upload image si fournie
+      let imageUrl = campaignForm.image_url || editingCampaign.image_url || null
+      if (imageFile) {
+        imageUrl = await uploadImage()
+        if (!imageUrl) {
+          alert('Erreur lors de l\'upload de l\'image')
+          return
+        }
+      }
+
+      const campaignData = {
+        title: campaignForm.title,
+        description: campaignForm.description || null,
+        advertiser_name: campaignForm.advertiser_name,
+        advertiser_email: campaignForm.advertiser_email,
+        ad_url: campaignForm.ad_url,
+        image_url: imageUrl,
+        placement: campaignForm.placement,
+        start_date: campaignForm.start_date,
+        end_date: campaignForm.end_date,
+        max_impressions: campaignForm.max_impressions ? parseInt(campaignForm.max_impressions) : null,
+        max_clicks: campaignForm.max_clicks ? parseInt(campaignForm.max_clicks) : null,
+        priority: campaignForm.priority,
+      }
+
+      const { data, error } = await supabase
+        .from('ad_campaigns')
+        .update(campaignData)
+        .eq('id', editingCampaign.id)
+        .select()
+        .single()
+
+      if (!error && data) {
+        setCampaigns((prev) => prev.map((c) => (c.id === editingCampaign.id ? data : c)))
+        setShowEditModal(false)
+        resetForm()
+        router.refresh()
+      } else {
+        alert('Erreur lors de la modification de la campagne: ' + (error?.message || 'Erreur inconnue'))
+      }
+    } catch (error: any) {
+      console.error('Error updating campaign:', error)
+      alert('Erreur lors de la modification de la campagne: ' + (error?.message || 'Erreur inconnue'))
     }
   }
 
@@ -548,6 +630,13 @@ export default function AdManagement({
                         Stats
                       </button>
                       <button
+                        onClick={() => openEditModal(campaign)}
+                        className="px-3 py-1 bg-primary text-white rounded text-sm hover:bg-primary-dark transition-colors flex items-center gap-1"
+                      >
+                        <Edit className="w-4 h-4" />
+                        Modifier
+                      </button>
+                      <button
                         onClick={() => toggleCampaignStatus(campaign.id, campaign.status)}
                         className={`px-3 py-1 rounded text-sm transition-colors ${
                           campaign.status === 'active'
@@ -776,7 +865,231 @@ export default function AdManagement({
                   {uploadingImage ? 'Upload en cours...' : 'Créer la campagne'}
                 </button>
                 <button
-                  onClick={() => setShowCreateModal(false)}
+                  onClick={() => {
+                    setShowCreateModal(false)
+                    resetForm()
+                  }}
+                  className="px-6 py-3 border border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+                >
+                  Annuler
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal édition campagne */}
+      {showEditModal && editingCampaign && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+              <h2 className="text-2xl font-bold">Modifier la campagne</h2>
+              <button onClick={() => {
+                setShowEditModal(false)
+                resetForm()
+              }} className="text-gray-400 hover:text-gray-600">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Titre *</label>
+                <input
+                  type="text"
+                  value={campaignForm.title}
+                  onChange={(e) => setCampaignForm({ ...campaignForm, title: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  placeholder="Ex: Promotion spéciale"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                <textarea
+                  value={campaignForm.description}
+                  onChange={(e) => setCampaignForm({ ...campaignForm, description: e.target.value })}
+                  rows={3}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  placeholder="Description de la campagne"
+                />
+              </div>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Nom annonceur *</label>
+                  <input
+                    type="text"
+                    value={campaignForm.advertiser_name}
+                    onChange={(e) => setCampaignForm({ ...campaignForm, advertiser_name: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Email annonceur *</label>
+                  <input
+                    type="email"
+                    value={campaignForm.advertiser_email}
+                    onChange={(e) => setCampaignForm({ ...campaignForm, advertiser_email: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">URL de la publicité *</label>
+                <input
+                  type="url"
+                  value={campaignForm.ad_url}
+                  onChange={(e) => setCampaignForm({ ...campaignForm, ad_url: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  placeholder="https://exemple.com"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Visuel de la campagne</label>
+                <div className="space-y-3">
+                  {/* Upload d'image */}
+                  <div>
+                    <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
+                      {imagePreview ? (
+                        <div className="relative w-full h-full">
+                          <Image
+                            src={imagePreview}
+                            alt="Aperçu"
+                            fill
+                            className="object-contain rounded-lg"
+                            unoptimized
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setImageFile(null)
+                              setImagePreview(editingCampaign.image_url || null)
+                            }}
+                            className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                          <Upload className="w-8 h-8 mb-2 text-gray-400" />
+                          <p className="mb-2 text-sm text-gray-500">
+                            <span className="font-semibold">Cliquez pour uploader</span> ou glissez-déposez
+                          </p>
+                          <p className="text-xs text-gray-500">PNG, JPG, GIF jusqu'à 5MB</p>
+                        </div>
+                      )}
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept="image/*"
+                        onChange={handleImageSelect}
+                        disabled={uploadingImage}
+                      />
+                    </label>
+                  </div>
+                  
+                  {/* Ou URL */}
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-gray-300"></div>
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                      <span className="px-2 bg-white text-gray-500">OU</span>
+                    </div>
+                  </div>
+                  
+                  <input
+                    type="url"
+                    value={campaignForm.image_url}
+                    onChange={(e) => setCampaignForm({ ...campaignForm, image_url: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="https://exemple.com/image.jpg"
+                    disabled={!!imageFile}
+                  />
+                </div>
+                {uploadingImage && (
+                  <p className="mt-2 text-sm text-gray-600">Upload en cours...</p>
+                )}
+              </div>
+              <div className="grid md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Emplacement *</label>
+                  <select
+                    value={campaignForm.placement}
+                    onChange={(e) => setCampaignForm({ ...campaignForm, placement: e.target.value as any })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  >
+                    <option value="header">Header</option>
+                    <option value="sidebar">Sidebar</option>
+                    <option value="footer">Footer</option>
+                    <option value="between_posts">Entre les annonces</option>
+                    <option value="popup">Popup</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Date de début *</label>
+                  <input
+                    type="date"
+                    value={campaignForm.start_date}
+                    onChange={(e) => setCampaignForm({ ...campaignForm, start_date: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Date de fin *</label>
+                  <input
+                    type="date"
+                    value={campaignForm.end_date}
+                    onChange={(e) => setCampaignForm({ ...campaignForm, end_date: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  />
+                </div>
+              </div>
+              <div className="grid md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Max impressions</label>
+                  <input
+                    type="number"
+                    value={campaignForm.max_impressions}
+                    onChange={(e) => setCampaignForm({ ...campaignForm, max_impressions: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="Illimité"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Max clics</label>
+                  <input
+                    type="number"
+                    value={campaignForm.max_clicks}
+                    onChange={(e) => setCampaignForm({ ...campaignForm, max_clicks: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="Illimité"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Priorité</label>
+                  <input
+                    type="number"
+                    value={campaignForm.priority}
+                    onChange={(e) => setCampaignForm({ ...campaignForm, priority: parseInt(e.target.value) || 0 })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    min="0"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={updateCampaign}
+                  disabled={uploadingImage}
+                  className="flex-1 bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {uploadingImage ? 'Upload en cours...' : 'Enregistrer les modifications'}
+                </button>
+                <button
+                  onClick={() => {
+                    setShowEditModal(false)
+                    resetForm()
+                  }}
                   className="px-6 py-3 border border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
                 >
                   Annuler
