@@ -515,12 +515,12 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
                   />
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+                <div className="flex-1 overflow-y-auto p-2 sm:p-4 space-y-3 sm:space-y-4 bg-gray-50">
                   {currentConversationMessages.length === 0 ? (
                     <div className="text-center text-gray-500 py-8">
-                      <MessageCircle className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-                      <p>Aucun message dans cette conversation</p>
-                      <p className="text-sm mt-2">Envoyez le premier message !</p>
+                      <MessageCircle className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 text-gray-300" />
+                      <p className="text-sm sm:text-base">Aucun message dans cette conversation</p>
+                      <p className="text-xs sm:text-sm mt-2">Envoyez le premier message !</p>
                     </div>
                   ) : (
                     <>
@@ -533,15 +533,15 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
                         return (
                           <div key={msg.id}>
                             {showDate && (
-                              <div className="text-center my-4">
-                                <span className="bg-white px-3 py-1 rounded-full text-xs text-gray-500">
+                              <div className="text-center my-3 sm:my-4">
+                                <span className="bg-white px-2 sm:px-3 py-1 rounded-full text-xs text-gray-500">
                                   {format(new Date(msg.created_at), 'd MMMM yyyy', { locale: fr })}
                                 </span>
                               </div>
                             )}
                             <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
                               <div
-                                className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                                className={`max-w-[75%] sm:max-w-xs lg:max-w-md px-3 sm:px-4 py-2 rounded-lg ${
                                   isOwn
                                     ? 'bg-primary text-white rounded-br-none'
                                     : 'bg-white text-gray-900 rounded-bl-none shadow-sm'
@@ -589,10 +589,10 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
                 </div>
 
                 {/* Input */}
-                <div className="p-4 border-t border-gray-200 bg-white">
+                <div className="p-2 sm:p-4 border-t border-gray-200 bg-white">
                   {photoPreview && (
-                    <div className="mb-3 relative inline-block">
-                      <div className="relative w-32 h-32 rounded-lg overflow-hidden border-2 border-primary">
+                    <div className="mb-2 sm:mb-3 relative inline-block">
+                      <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-lg overflow-hidden border-2 border-primary">
                         <Image
                           src={photoPreview}
                           alt="Preview"
@@ -605,11 +605,11 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
                         onClick={removePhoto}
                         className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
                       >
-                        <X className="w-4 h-4" />
+                        <X className="w-3 h-3 sm:w-4 sm:h-4" />
                       </button>
                     </div>
                   )}
-                  <div className="flex gap-2">
+                  <div className="flex gap-1 sm:gap-2">
                     <input
                       type="file"
                       ref={fileInputRef}
