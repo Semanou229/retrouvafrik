@@ -338,7 +338,7 @@ export default function AdminAnnouncementsManager({
                           {format(new Date(announcement.created_at), 'd MMM yyyy', { locale: fr })}
                         </span>
                         <span>•</span>
-                        <span>{(announcement.user as any)?.email || 'Utilisateur anonyme'}</span>
+                        <span>{announcement.user_id ? `ID: ${announcement.user_id.substring(0, 8)}...` : 'Utilisateur anonyme'}</span>
                         <span>•</span>
                         <span>{announcement.views_count || 0} vues</span>
                       </div>
