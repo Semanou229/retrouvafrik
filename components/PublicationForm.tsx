@@ -317,12 +317,44 @@ export default function PublicationForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="bg-white rounded-lg shadow-lg p-6 md:p-8">
       {/* Progress bar */}
-      <div className="mb-8">
-        <div className="flex justify-between mb-2">
+      <div className="mb-6 md:mb-8">
+        {/* Barre de progression mobile avec scroll horizontal */}
+        <div className="block md:hidden">
+          <div className="overflow-x-auto pb-2 -mx-6 px-6 scrollbar-hide">
+            <div className="flex gap-2 min-w-max">
+              {STEPS.map((step) => (
+                <div
+                  key={step.id}
+                  className="flex-shrink-0 w-20"
+                >
+                  <div
+                    className={`h-1.5 rounded ${
+                      step.id <= currentStep ? 'bg-primary' : 'bg-gray-200'
+                    }`}
+                  />
+                  <p
+                    className={`text-[9px] mt-1.5 text-center leading-tight whitespace-nowrap ${
+                      step.id <= currentStep ? 'text-primary font-semibold' : 'text-gray-500'
+                    }`}
+                    title={step.title}
+                  >
+                    {step.id === 1 ? 'Type' : 
+                     step.id === 2 ? 'Infos' :
+                     step.id === 3 ? 'Médias' :
+                     step.id === 4 ? 'Contact' : 'Vérif'}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        
+        {/* Barre de progression desktop */}
+        <div className="hidden md:flex justify-between mb-2 gap-2">
           {STEPS.map((step) => (
             <div
               key={step.id}
-              className={`flex-1 ${step.id < STEPS.length ? 'mr-2' : ''}`}
+              className="flex-1 min-w-0"
             >
               <div
                 className={`h-2 rounded ${
@@ -330,9 +362,10 @@ export default function PublicationForm() {
                 }`}
               />
               <p
-                className={`text-xs mt-2 text-center ${
+                className={`text-xs mt-2 text-center truncate ${
                   step.id <= currentStep ? 'text-primary font-semibold' : 'text-gray-500'
                 }`}
+                title={step.title}
               >
                 {step.title}
               </p>

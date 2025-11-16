@@ -291,31 +291,33 @@ export default function PerduDeVueForm() {
       {/* Progress bar */}
       <div className="mb-6 md:mb-8">
         {/* Barre de progression mobile avec scroll horizontal */}
-        <div className="block md:hidden overflow-x-auto pb-2 -mx-6 px-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-          <div className="flex gap-3 min-w-max px-2">
-            {STEPS.map((step) => (
-              <div
-                key={step.id}
-                className="flex-shrink-0 w-24"
-              >
+        <div className="block md:hidden">
+          <div className="overflow-x-auto pb-2 -mx-6 px-6 scrollbar-hide">
+            <div className="flex gap-2 min-w-max">
+              {STEPS.map((step) => (
                 <div
-                  className={`h-2 rounded ${
-                    step.id <= currentStep ? 'bg-primary' : 'bg-gray-200'
-                  }`}
-                />
-                <p
-                  className={`text-[10px] mt-2 text-center leading-tight ${
-                    step.id <= currentStep ? 'text-primary font-semibold' : 'text-gray-500'
-                  }`}
-                  title={step.title}
+                  key={step.id}
+                  className="flex-shrink-0 w-20"
                 >
-                  {step.id === 1 ? 'Infos' : 
-                   step.id === 2 ? 'Histoire' :
-                   step.id === 3 ? 'Photo' :
-                   step.id === 4 ? 'Contact' : 'Vérif'}
-                </p>
-              </div>
-            ))}
+                  <div
+                    className={`h-1.5 rounded ${
+                      step.id <= currentStep ? 'bg-primary' : 'bg-gray-200'
+                    }`}
+                  />
+                  <p
+                    className={`text-[9px] mt-1.5 text-center leading-tight whitespace-nowrap ${
+                      step.id <= currentStep ? 'text-primary font-semibold' : 'text-gray-500'
+                    }`}
+                    title={step.title}
+                  >
+                    {step.id === 1 ? 'Infos' : 
+                     step.id === 2 ? 'Histoire' :
+                     step.id === 3 ? 'Photo' :
+                     step.id === 4 ? 'Contact' : 'Vérif'}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
         
