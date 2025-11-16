@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     // Récupérer l'annonce
     const { data: announcement, error: announcementError } = await supabase
       .from('announcements')
-      .select('*, user:auth.users(email)')
+      .select('*')
       .eq('id', announcementId)
       .single()
 
@@ -28,6 +28,19 @@ export async function POST(request: Request) {
         { error: 'Annonce non trouvée' },
         { status: 404 }
       )
+    }
+
+    // Récupérer l'email de l'utilisateur si user_id existe
+    let userEmail = 'Utilisateur anonyme'
+    if (announcement.user_id) {
+      try {
+        const { data: userData } = await supabase.auth.admin.getUserById(announcement.user_id)
+        if (userData?.user?.email) {
+          userEmail = userData.user.email
+        }
+      } catch (err) {
+        console.error('Erreur récupération email utilisateur:', err)
+      }
     }
 
     // Récupérer l'email de l'admin
@@ -84,7 +97,7 @@ export async function POST(request: Request) {
                   <div class="details">
                     <p><span class="label">Titre :</span> ${announcement.title}</p>
                     <p><span class="label">Type :</span> ${announcement.type === 'person' ? 'Personne' : announcement.type === 'animal' ? 'Animal' : 'Objet'}</p>
-                    <p><span class="label">Créée par :</span> ${announcement.user?.email || 'Utilisateur anonyme'}</p>
+                    <p><span class="label">Créée par :</span> ${userEmail}</p>
                     <p><span class="label">Date de création :</span> ${new Date(announcement.created_at).toLocaleString('fr-FR')}</p>
                   </div>
 
