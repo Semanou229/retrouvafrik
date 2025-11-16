@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server'
 
-// Note: Cette route utilise Edge Runtime compatible avec Cloudflare Pages
-// Pour l'envoi d'emails, nous utilisons Resend API (compatible Edge Runtime)
-// ou une Edge Function Supabase
-export const runtime = 'edge'
+// Note: Edge Runtime désactivé car async_hooks n'est pas disponible dans Edge Runtime
+// export const runtime = 'edge'
 
 export async function POST(request: Request) {
   try {

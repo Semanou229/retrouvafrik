@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import AdminSupportManager from '@/components/AdminSupportManager'
 
 export const dynamic = 'force-dynamic'
-export const runtime = 'edge'
+// export const runtime = 'edge' // Désactivé: async_hooks non disponible dans Edge Runtime
 
 export default async function AdminSupportPage({
   searchParams,
