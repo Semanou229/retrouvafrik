@@ -233,7 +233,12 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
   
   // If announcementId is provided but no conversation exists, try to fetch announcement info
   useEffect(() => {
-    if (announcementId && !currentConversation && user) {
+    if (!announcementId || !user) return
+    
+    // Check if conversation exists for this announcementId
+    const conversationExists = conversationList.some(c => c.announcementId === announcementId)
+    
+    if (!conversationExists) {
       const fetchAnnouncementInfo = async () => {
         const { data: announcement } = await supabase
           .from('announcements')
@@ -260,7 +265,7 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
       
       fetchAnnouncementInfo()
     }
-  }, [announcementId, currentConversation, user, messages, supabase, selectedConversation])
+  }, [announcementId, user, messages, supabase, conversationList])
   
   // Get messages for the selected conversation
   const currentConversationMessages = selectedConversation
