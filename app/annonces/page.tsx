@@ -79,7 +79,8 @@ export default async function AnnoncesPage({
     sortOrder = 'desc'
   }
 
-  const { data: allAnnouncements } = await query.order(sortColumn, { ascending: sortOrder === 'asc' })
+  const ascending = sortOrder === 'asc'
+  const { data: allAnnouncements } = await query.order(sortColumn, { ascending })
 
   // Filter announcements based on view type
   let announcements = allAnnouncements || []
