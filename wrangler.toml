@@ -6,6 +6,9 @@ pages_build_output_dir = ".vercel/output/static"
 # Note: Cloudflare Pages détecte automatiquement Next.js
 # La commande de build doit être configurée dans le dashboard Cloudflare
 
+# Flag de compatibilité Node.js requis pour @cloudflare/next-on-pages
+compatibility_flags = ["nodejs_compat"]
+
 # Variables d'environnement peuvent être définies ici ou dans le dashboard Cloudflare
 # [vars]
 # NEXT_PUBLIC_SITE_URL = "https://retrouvafrik.pages.dev"
