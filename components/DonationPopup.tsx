@@ -32,19 +32,31 @@ export default function DonationPopup() {
 
     // Charger les paramètres de don
     const loadDonationSettings = async () => {
-      const supabase = createSupabaseClient()
-      const { data } = await supabase
-        .from('donation_settings')
-        .select('*')
-        .eq('is_active', true)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single()
+      try {
+        const supabase = createSupabaseClient()
+        // Utiliser une requête publique sans authentification
+        const { data, error } = await supabase
+          .from('donation_settings')
+          .select('id, title, description, donation_url, is_active')
+          .eq('is_active', true)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
 
-      if (data && data.is_active) {
-        setDonationUrl(data.donation_url)
-        setDonationTitle(data.title || 'Faites un don')
-        setIsActive(true)
+        if (error) {
+          // Ne pas afficher l'erreur en production, juste ne pas afficher le popup
+          console.warn('Paramètres de don non disponibles:', error.message)
+          return
+        }
+
+        if (data && data.is_active) {
+          setDonationUrl(data.donation_url || '#')
+          setDonationTitle(data.title || 'Faites un don')
+          setIsActive(true)
+        }
+      } catch (err) {
+        // Ignorer silencieusement les erreurs pour ne pas perturber l'expérience utilisateur
+        console.warn('Erreur lors du chargement des paramètres de don:', err)
       }
     }
 
