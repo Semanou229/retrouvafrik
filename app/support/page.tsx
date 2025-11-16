@@ -25,13 +25,30 @@ export default async function SupportPage() {
     .order('created_at', { ascending: false })
     .limit(20)
 
-  // Récupérer les tickets récents de l'utilisateur
+  // Récupérer les tickets récents de l'utilisateur avec le statut des messages non lus
   const { data: userTickets } = await supabase
     .from('support_tickets')
     .select('*, announcement:announcements(id, title)')
     .eq('user_id', session.user.id)
     .order('created_at', { ascending: false })
     .limit(10)
+
+  // Vérifier les messages non lus pour chaque ticket
+  const ticketsWithUnreadStatus = await Promise.all(
+    (userTickets || []).map(async (ticket) => {
+      const { count } = await supabase
+        .from('ticket_messages')
+        .select('*', { count: 'exact', head: true })
+        .eq('ticket_id', ticket.id)
+        .eq('is_admin', true)
+        .eq('is_read', false)
+
+      return {
+        ...ticket,
+        has_unread_messages: (count || 0) > 0,
+      }
+    })
+  )
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -46,11 +63,11 @@ export default async function SupportPage() {
         </div>
 
         {/* Liste des tickets récents */}
-        {userTickets && userTickets.length > 0 && (
+        {ticketsWithUnreadStatus && ticketsWithUnreadStatus.length > 0 && (
           <div className="mb-8 bg-white rounded-xl shadow-lg border border-gray-100 p-6">
             <h2 className="text-xl font-bold mb-4">Mes tickets récents</h2>
             <div className="space-y-3">
-              {userTickets.map((ticket) => (
+              {ticketsWithUnreadStatus.map((ticket) => (
                 <SupportTicketItem key={ticket.id} ticket={ticket} />
               ))}
             </div>

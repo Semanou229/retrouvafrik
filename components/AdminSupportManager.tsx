@@ -64,7 +64,25 @@ export default function AdminSupportManager({
 
       const { data, error } = await query
       if (error) throw error
-      setTickets(data || [])
+
+      // Vérifier les messages non lus pour chaque ticket (messages des utilisateurs pour l'admin)
+      const ticketsWithUnreadStatus = await Promise.all(
+        (data || []).map(async (ticket) => {
+          const { count } = await supabase
+            .from('ticket_messages')
+            .select('*', { count: 'exact', head: true })
+            .eq('ticket_id', ticket.id)
+            .eq('is_admin', false)
+            .eq('is_read', false)
+
+          return {
+            ...ticket,
+            has_unread_messages: (count || 0) > 0,
+          }
+        })
+      )
+
+      setTickets(ticketsWithUnreadStatus)
     } catch (err: any) {
       setError(err.message || 'Erreur lors du chargement')
     } finally {
@@ -378,6 +396,11 @@ export default function AdminSupportManager({
                             ? 'Résolu'
                             : 'Fermé'}
                         </span>
+                        {ticket.has_unread_messages && (
+                          <span className="px-2 py-1 rounded-full text-xs font-semibold text-white bg-red-500 animate-pulse">
+                            Nouveau
+                          </span>
+                        )}
                         <span
                           className={`px-2 py-1 rounded text-xs font-semibold text-white ${getPriorityColor(
                             ticket.priority

@@ -64,8 +64,26 @@ export default function TicketDetailModal({
   useEffect(() => {
     if (isOpen && ticket.id) {
       loadMessages()
+      markMessagesAsRead()
     }
   }, [isOpen, ticket.id])
+
+  const markMessagesAsRead = async () => {
+    try {
+      // Marquer les messages comme lus selon le rôle
+      const { error: updateError } = await supabase
+        .from('ticket_messages')
+        .update({ is_read: true })
+        .eq('ticket_id', ticket.id)
+        .eq('is_admin', !isAdmin) // Marquer les messages de l'autre partie comme lus
+
+      if (updateError) {
+        console.error('Error marking messages as read:', updateError)
+      }
+    } catch (err) {
+      console.error('Error marking messages as read:', err)
+    }
+  }
 
   const loadMessages = async () => {
     setIsLoading(true)

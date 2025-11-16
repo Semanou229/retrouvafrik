@@ -19,6 +19,7 @@ interface SupportTicketItemProps {
     created_at: string
     updated_at: string
     announcement?: { id: string; title: string }
+    has_unread_messages?: boolean
   }
 }
 
@@ -70,6 +71,11 @@ export default function SupportTicketItem({ ticket }: SupportTicketItemProps) {
               >
                 {getStatusLabel(ticket.status)}
               </span>
+              {ticket.has_unread_messages && (
+                <span className="px-2 py-1 rounded-full text-xs font-semibold text-white bg-red-500 animate-pulse">
+                  Nouveau
+                </span>
+              )}
             </div>
             <p className="text-gray-600 mb-2 line-clamp-2">{ticket.description}</p>
             <div className="flex items-center gap-4 text-sm text-gray-500">
