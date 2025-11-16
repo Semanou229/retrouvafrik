@@ -36,8 +36,10 @@ export default function LoginForm() {
       }
 
       if (data?.user) {
-        router.push('/mon-compte')
-        router.refresh()
+        // Attendre un peu pour que la session soit bien enregistrée
+        await new Promise(resolve => setTimeout(resolve, 100))
+        // Utiliser window.location pour forcer un rechargement complet
+        window.location.href = '/mon-compte'
       }
     } catch (err: any) {
       setError(err.message || 'Une erreur s\'est produite lors de la connexion')
