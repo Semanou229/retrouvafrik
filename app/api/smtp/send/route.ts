@@ -53,7 +53,7 @@ export async function POST(request: Request) {
     }
 
     // Créer le transporteur SMTP
-    const transporter = nodemailer.default.createTransport({
+    const transporter = (nodemailer.default || nodemailer).createTransport({
       host: smtpConfig.host,
       port: smtpConfig.port,
       secure: smtpConfig.secure,
