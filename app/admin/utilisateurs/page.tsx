@@ -39,7 +39,7 @@ export default async function AdminUtilisateursPage() {
     .not('user_id', 'is', null)
 
   // Créer une liste unique d'utilisateurs depuis les annonces
-  const uniqueUserIds = [...new Set(announcements?.map(a => a.user_id) || [])]
+  const uniqueUserIds = Array.from(new Set(announcements?.map(a => a.user_id) || []))
   
   // Pour chaque utilisateur, récupérer les infos de base
   // Note: En production, utilisez l'API admin de Supabase avec les bonnes permissions
