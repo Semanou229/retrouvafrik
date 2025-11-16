@@ -1,0 +1,19 @@
+name = "retrouvafrik"
+compatibility_date = "2024-01-01"
+pages_build_output_dir = ".next"
+
+# Configuration pour Cloudflare Pages
+[build]
+command = "npm run build"
+cwd = "."
+
+# Variables d'environnement peuvent être définies ici ou dans le dashboard Cloudflare
+# [vars]
+# NEXT_PUBLIC_SITE_URL = "https://retrouvafrik.pages.dev"
+
+[env.production]
+name = "retrouvafrik"
+
+[env.preview]
+name = "retrouvafrik-preview"
+

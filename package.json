@@ -11,7 +11,8 @@
     "confirm-emails": "node scripts/confirm-emails.js",
     "fix-users": "node scripts/fix-confirmation.js",
     "recreate-users": "node scripts/delete-and-recreate-users.js",
-    "create-demo-announcements": "node scripts/create-demo-announcements.js"
+    "create-demo-announcements": "node scripts/create-demo-announcements.js",
+    "deploy:cloudflare": "npm run build && wrangler pages deploy .next --project-name=retrouvafrik"
   },
   "dependencies": {
     "next": "^14.0.4",

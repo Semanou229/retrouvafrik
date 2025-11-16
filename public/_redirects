@@ -1,0 +1,6 @@
+# Redirects pour Cloudflare Pages
+# Format: source destination [status code]
+
+# Redirection des routes Next.js vers index.html
+/*    /index.html   200
+
