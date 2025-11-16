@@ -1,0 +1,28 @@
+═══════════════════════════════════════════════════════════
+  🔐 ACCÈS DE TEST - TROUVITA
+═══════════════════════════════════════════════════════════
+
+✅ COMPTE ADMINISTRATEUR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Email    : admin.trouvita@gmail.com
+Password : Admin123456!
+URL      : http://localhost:3000/admin
+
+✅ COMPTE UTILISATEUR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Email    : test.trouvita@gmail.com
+Password : Test123456!
+URL      : http://localhost:3000/mon-compte
+
+✅ COMPTE DÉMONSTRATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Email    : demo.trouvita@gmail.com
+Password : Demo123456!
+
+═══════════════════════════════════════════════════════════
+  🚀 CONNEXION
+═══════════════════════════════════════════════════════════
+URL : http://localhost:3000/connexion
+
+═══════════════════════════════════════════════════════════
+
