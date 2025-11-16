@@ -246,7 +246,7 @@ export default function PublicationForm() {
       // Upload photos
       const photoUrls = await uploadPhotos()
 
-      // Create announcement
+      // Create announcement (non approuvée par défaut)
       const announcementData: any = {
         type: data.type,
         title: data.title,
@@ -266,6 +266,7 @@ export default function PublicationForm() {
         contact_visibility: data.contact_visibility,
         user_id: user?.id || null,
         status: 'active',
+        approved: false, // Nécessite l'approbation de l'admin
       }
 
       // Ajouter mode et secret_detail pour les objets
@@ -291,22 +292,21 @@ export default function PublicationForm() {
         throw new Error('L\'annonce n\'a pas pu être créée')
       }
 
-      // Déclencher l'envoi des notifications par email aux membres du secteur
+      // Envoyer un email à l'admin pour approbation
       try {
-        await fetch('/api/notifications/send', {
+        await fetch('/api/admin/notify-announcement', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ announcementId: announcement.id }),
         })
-        // On ne bloque pas la navigation si l'envoi d'emails échoue
       } catch (notificationError) {
-        console.error('Erreur lors de l\'envoi des notifications:', notificationError)
-        // On continue quand même
+        console.error('Erreur lors de l\'envoi de la notification admin:', notificationError)
       }
 
-      router.push(`/annonces/${announcement.id}`)
+      // Rediriger vers une page de confirmation d'attente d'approbation
+      router.push(`/annonces/${announcement.id}?pending=true`)
       router.refresh()
     } catch (err: any) {
       console.error('Form submission error:', err)

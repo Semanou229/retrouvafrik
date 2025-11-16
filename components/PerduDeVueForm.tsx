@@ -124,7 +124,7 @@ export default function PerduDeVueForm() {
     try {
       const photoUrls = await uploadPhotos()
 
-      // Créer l'annonce "Perdu de vue"
+      // Créer l'annonce "Perdu de vue" (non approuvée par défaut)
       const announcementData = {
         type: 'person',
         title: `Recherche de ${data.person_name} - ${data.year_or_period}`,
@@ -143,6 +143,7 @@ export default function PerduDeVueForm() {
         user_id: user?.id || null,
         status: 'active',
         is_lost_sight: true, // Marquer comme "perdu de vue"
+        approved: false, // Nécessite l'approbation de l'admin
       }
 
       const { data: announcement, error: insertError } = await supabase

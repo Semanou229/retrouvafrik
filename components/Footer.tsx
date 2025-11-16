@@ -40,6 +40,7 @@ export default function Footer() {
               <li><Link href="/comment-ca-marche" className="hover:text-primary transition-colors">Comment ça marche</Link></li>
               <li><Link href="/faq" className="hover:text-primary transition-colors">FAQ</Link></li>
               <li><Link href="/contact" className="hover:text-primary transition-colors">Contact</Link></li>
+              <li><Link href="/annonceurs" className="hover:text-primary transition-colors">Annonceurs</Link></li>
               <li>
                 <Link href="/don" className="hover:text-primary transition-colors flex items-center gap-2">
                   <Heart className="w-4 h-4 text-primary" />
