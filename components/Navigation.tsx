@@ -60,7 +60,7 @@ export default function Navigation() {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-4 lg:space-x-6">
             <Link
               href="/annonces"
               className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
@@ -88,18 +88,19 @@ export default function Navigation() {
               <>
                 <Link
                   href="/comment-ca-marche"
-                  className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`flex items-center space-x-1 px-2 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
                     isActive('/comment-ca-marche')
                       ? 'text-primary bg-primary/10'
                       : 'text-gray-700 hover:text-primary hover:bg-gray-50'
                   }`}
                 >
                   <Info className="w-4 h-4" />
-                  <span>Comment ça marche</span>
+                  <span className="hidden lg:inline">Comment ça marche</span>
+                  <span className="lg:hidden">Comment</span>
                 </Link>
                 <Link
                   href="/faq"
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`px-2 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
                     isActive('/faq')
                       ? 'text-primary bg-primary/10'
                       : 'text-gray-700 hover:text-primary hover:bg-gray-50'
@@ -109,7 +110,7 @@ export default function Navigation() {
                 </Link>
                 <Link
                   href="/contact"
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`px-2 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
                     isActive('/contact')
                       ? 'text-primary bg-primary/10'
                       : 'text-gray-700 hover:text-primary hover:bg-gray-50'
@@ -123,55 +124,56 @@ export default function Navigation() {
                 {loading ? (
                   <div className="w-8 h-8 border-2 border-gray-300 border-t-primary rounded-full animate-spin" />
                 ) : user ? (
-                  <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-2 lg:space-x-3">
                     {/* Publier une annonce - Visible quand connecté */}
                     <Link
                       href="/publier"
-                      className="flex items-center space-x-1 bg-primary text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-primary-dark transition-all shadow-lg hover:shadow-xl"
+                      className="flex items-center space-x-1 bg-primary text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-primary-dark transition-all shadow-lg hover:shadow-xl whitespace-nowrap"
                     >
                       <Plus className="w-4 h-4" />
-                      <span className="hidden sm:inline">Publier une annonce</span>
-                      <span className="sm:hidden">Publier</span>
+                      <span className="hidden lg:inline">Publier une annonce</span>
+                      <span className="lg:hidden">Publier</span>
                     </Link>
                     {/* Admin - Visible uniquement pour les admins */}
                     {(user.email?.includes('admin') || user.user_metadata?.role === 'admin') && (
                       <Link
                         href="/admin"
-                        className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                        className={`flex items-center space-x-1 px-2 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
                           isActive('/admin')
                             ? 'text-primary bg-primary/10'
                             : 'text-gray-700 hover:text-primary hover:bg-gray-50'
                         }`}
                       >
                         <Shield className="w-4 h-4" />
-                        <span className="text-sm hidden sm:inline">Admin</span>
+                        <span className="text-sm hidden lg:inline">Admin</span>
                       </Link>
                     )}
 
                     {/* Tableau de bord - Directement dans le header */}
                     <Link
                       href="/mon-compte"
-                      className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                      className={`flex items-center space-x-1 px-2 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
                         isActive('/mon-compte')
                           ? 'text-primary bg-primary/10'
                           : 'text-gray-700 hover:text-primary hover:bg-gray-50'
                       }`}
                     >
                       <LayoutDashboard className="w-4 h-4" />
-                      <span className="text-sm hidden sm:inline">Tableau de bord</span>
+                      <span className="text-sm hidden lg:inline">Tableau de bord</span>
+                      <span className="text-sm lg:hidden">Dashboard</span>
                     </Link>
 
                     {/* Messages - Directement dans le header */}
                     <Link
                       href="/messages"
-                      className={`relative flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                      className={`relative flex items-center space-x-1 px-2 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
                         isActive('/messages')
                           ? 'text-primary bg-primary/10'
                           : 'text-gray-700 hover:text-primary hover:bg-gray-50'
                       }`}
                     >
                       <MessageCircle className="w-4 h-4" />
-                      <span className="text-sm hidden sm:inline">Messages</span>
+                      <span className="text-sm hidden lg:inline">Messages</span>
                       <UnreadMessagesBadge />
                     </Link>
 
@@ -179,14 +181,14 @@ export default function Navigation() {
                     {!(user.email?.includes('admin') || user.user_metadata?.role === 'admin') && (
                       <Link
                         href="/support"
-                        className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                        className={`flex items-center space-x-1 px-2 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
                           isActive('/support')
                             ? 'text-primary bg-primary/10'
                             : 'text-gray-700 hover:text-primary hover:bg-gray-50'
                         }`}
                       >
                         <HelpCircle className="w-4 h-4" />
-                        <span className="text-sm hidden sm:inline">Support</span>
+                        <span className="text-sm hidden lg:inline">Support</span>
                       </Link>
                     )}
 
@@ -194,13 +196,13 @@ export default function Navigation() {
                 <div className="relative" ref={profileMenuRef}>
                   <button
                     onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                    className="flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors text-gray-700 hover:text-primary hover:bg-gray-50"
+                    className="flex items-center space-x-1.5 px-2 py-2 rounded-md text-sm font-medium transition-colors text-gray-700 hover:text-primary hover:bg-gray-50 whitespace-nowrap"
                   >
-                    <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                    <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
                       <User className="w-4 h-4 text-primary" />
                     </div>
-                    <span className="text-sm hidden sm:inline">{user.email?.split('@')[0] || 'Profil'}</span>
-                    <ChevronDown className={`w-4 h-4 transition-transform ${profileMenuOpen ? 'rotate-180' : ''}`} />
+                    <span className="text-sm">Profil</span>
+                    <ChevronDown className={`w-4 h-4 transition-transform flex-shrink-0 ${profileMenuOpen ? 'rotate-180' : ''}`} />
                   </button>
 
                   {/* Profile Dropdown Menu */}
