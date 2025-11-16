@@ -258,8 +258,7 @@ export default function PerduDeVueForm() {
       }
 
       // Rediriger vers une page de confirmation d'attente d'approbation
-      router.push(`/annonces/${announcement.id}?pending=true`)
-      router.refresh()
+      router.push('/annonces/en-attente')
     } catch (err: any) {
       console.error('Form submission error:', err)
       setError(err.message || 'Une erreur s\'est produite lors de la publication. Veuillez réessayer.')
