@@ -65,21 +65,20 @@ export default async function AnnoncesPage({
 
   // Determine sort order
   let sortColumn = 'created_at'
-  let sortOrder: 'asc' | 'desc' = 'desc'
+  let ascending = false // Default to descending order
   
   if (searchParams.sort === 'popular') {
     sortColumn = 'views_count'
-    sortOrder = 'desc'
+    ascending = false
   } else if (searchParams.sort === 'recent') {
     sortColumn = 'created_at'
-    sortOrder = 'desc'
+    ascending = false
   } else if (searchParams.sort === 'urgent') {
     query = query.eq('urgency', 'urgent')
     sortColumn = 'created_at'
-    sortOrder = 'desc'
+    ascending = false
   }
 
-  const ascending = sortOrder === 'asc'
   const { data: allAnnouncements } = await query.order(sortColumn, { ascending })
 
   // Filter announcements based on view type
