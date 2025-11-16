@@ -770,9 +770,10 @@ export default function AdManagement({
               <div className="flex gap-3 pt-4">
                 <button
                   onClick={createCampaign}
-                  className="flex-1 bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-dark transition-colors"
+                  disabled={uploadingImage}
+                  className="flex-1 bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Créer la campagne
+                  {uploadingImage ? 'Upload en cours...' : 'Créer la campagne'}
                 </button>
                 <button
                   onClick={() => setShowCreateModal(false)}
