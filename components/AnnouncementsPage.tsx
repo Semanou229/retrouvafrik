@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import AnnouncementCard from './AnnouncementCard'
+import AdBanner from './AdBanner'
 import { Filter, Search, TrendingUp, Clock, Eye, Sparkles } from 'lucide-react'
 import type { Announcement } from '@/lib/types'
 import { getCountriesFromDB, getCitiesByCountryFromDB } from '@/lib/countries-cities-db'

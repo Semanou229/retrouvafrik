@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Navigation from '@/components/Navigation'
 import Footer from '@/components/Footer'
 import HeroSection from '@/components/HeroSection'
+import AdBanner from '@/components/AdBanner'
 import { Search, Users, Heart, ArrowRight, CheckCircle, Shield, TrendingUp, Globe, Sparkles } from 'lucide-react'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import AnnouncementCard from '@/components/AnnouncementCard'
@@ -185,8 +186,16 @@ export default async function HomePage() {
           </div>
           {recentAnnouncements && recentAnnouncements.length > 0 ? (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {recentAnnouncements.map((announcement) => (
-                <AnnouncementCard key={announcement.id} announcement={announcement} />
+              {recentAnnouncements.map((announcement, index) => (
+                <div key={announcement.id}>
+                  <AnnouncementCard announcement={announcement} />
+                  {/* Publicité entre les annonces (toutes les 3 annonces) */}
+                  {index === 2 && (
+                    <div className="mt-6">
+                      <AdBanner placement="between_posts" />
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
           ) : (
