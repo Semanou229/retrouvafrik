@@ -1,6 +1,7 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
+// Note: Cette route peut utiliser Edge Runtime car elle ne fait que des appels HTTP
 export const runtime = 'edge'
 
 export async function POST(request: Request) {

@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 
-export const runtime = 'edge'
+// Note: Cette route ne peut pas utiliser Edge Runtime car nodemailer nécessite des modules Node.js natifs
+// (stream, fs, path, crypto) qui ne sont pas disponibles dans Edge Runtime
+// export const runtime = 'edge' // Désactivé pour cette route
 
 export async function POST(request: Request) {
   try {
