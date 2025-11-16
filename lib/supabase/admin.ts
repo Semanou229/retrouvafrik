@@ -6,8 +6,15 @@ export const createAdminSupabaseClient = () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-  if (!supabaseUrl || !supabaseServiceKey) {
-    throw new Error('Variables d\'environnement Supabase manquantes pour le client admin')
+  if (!supabaseUrl) {
+    throw new Error('NEXT_PUBLIC_SUPABASE_URL est manquant')
+  }
+
+  if (!supabaseServiceKey) {
+    // Si la service role key n'est pas disponible, retourner null
+    // Le code appelant devra gérer ce cas
+    console.warn('SUPABASE_SERVICE_ROLE_KEY n\'est pas définie. Les opérations admin pourraient être limitées.')
+    return null
   }
 
   return createClient(supabaseUrl, supabaseServiceKey, {

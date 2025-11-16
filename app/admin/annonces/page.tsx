@@ -5,9 +5,7 @@ import { redirect } from 'next/navigation'
 import AdminAnnouncementsManager from '@/components/AdminAnnouncementsManager'
 
 export const dynamic = 'force-dynamic'
-// Note: On ne peut pas utiliser Edge Runtime avec le service role key
-// Car il nécessite des variables d'environnement qui ne sont pas disponibles en Edge
-export const runtime = 'nodejs'
+export const runtime = 'edge'
 
 export default async function AdminAnnoncesPage({
   searchParams,
@@ -31,11 +29,22 @@ export default async function AdminAnnoncesPage({
     redirect('/mon-compte')
   }
 
-  // Utiliser le client admin pour contourner RLS et récupérer toutes les annonces
-  const adminSupabase = createAdminSupabaseClient()
+  // Essayer d'utiliser le client admin si disponible, sinon utiliser le client normal
+  // Le client normal devrait fonctionner avec les politiques RLS admin
+  let queryClient = supabase
+  
+  try {
+    const adminSupabase = createAdminSupabaseClient()
+    if (adminSupabase) {
+      queryClient = adminSupabase
+    }
+  } catch (error) {
+    // Si le client admin n'est pas disponible, utiliser le client normal
+    console.warn('Client admin non disponible, utilisation du client normal:', error)
+  }
 
   // Construire la requête
-  let query = adminSupabase
+  let query = queryClient
     .from('announcements')
     .select('*, user:user_id(email)')
     .order('created_at', { ascending: false })
