@@ -63,7 +63,7 @@ export default function Navigation() {
           <div className="hidden md:flex items-center space-x-4 lg:space-x-6">
             <Link
               href="/annonces"
-              className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+              className={`flex items-center space-x-1 px-2 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
                 isActive('/annonces')
                   ? 'text-primary bg-primary/10'
                   : 'text-gray-700 hover:text-primary hover:bg-gray-50'
@@ -74,7 +74,7 @@ export default function Navigation() {
             </Link>
             <Link
               href="/perdu-de-vue"
-              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+              className={`px-2 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
                 isActive('/perdu-de-vue')
                   ? 'text-primary bg-primary/10'
                   : 'text-gray-700 hover:text-primary hover:bg-gray-50'
