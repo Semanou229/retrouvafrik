@@ -56,7 +56,7 @@ export default async function AdminUtilisateursPage() {
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <AdminUsersManager
-          initialUsers={users?.users || []}
+          initialUsers={users || []}
           initialUserStatuses={userStatuses || []}
           initialUserStats={userStats || []}
         />
