@@ -427,16 +427,16 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Messages RetrouvAfrik</h1>
-        <p className="text-gray-600">
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Messages RetrouvAfrik</h1>
+        <p className="text-sm sm:text-base text-gray-600 hidden sm:block">
           {conversationList.length} conversation{conversationList.length > 1 ? 's' : ''}
         </p>
       </div>
 
       <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
-        <div className="flex h-[700px]">
-          {/* Conversations list */}
-          <div className="w-full md:w-1/3 border-r border-gray-200 overflow-y-auto">
+        <div className="flex h-[calc(100vh-250px)] sm:h-[600px] md:h-[700px]">
+          {/* Conversations list - Mobile: hidden when conversation selected, Desktop: always visible */}
+          <div className={`${selectedConversation ? 'hidden' : 'flex'} md:flex w-full md:w-1/3 border-r border-gray-200 overflow-y-auto flex-col`}>
             <div className="p-4 border-b border-gray-200 sticky top-0 bg-white z-10">
               <h2 className="font-semibold text-lg">Conversations</h2>
             </div>
@@ -479,28 +479,38 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
             )}
           </div>
 
-          {/* Messages */}
-          <div className="hidden md:flex flex-1 flex-col">
+          {/* Messages - Mobile: visible when conversation selected, Desktop: always visible */}
+          <div className={`${selectedConversation ? 'flex' : 'hidden'} md:flex flex-1 flex-col`}>
             {selectedConversation ? (
               <>
-                <div className="p-4 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white z-10">
-                  <div>
-                    <p className="font-semibold text-lg">
-                      {currentConversation?.announcementTitle || 
-                       (messages.find(m => m.announcement_id === selectedConversation) as any)?.announcement?.title || 
-                       'Annonce'}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      {currentConversation?.otherUserEmail || 
-                       (currentConversationMessages.length > 0 
-                         ? (currentConversationMessages[0].sender_id === user?.id 
-                            ? currentConversationMessages[0].recipient?.email 
-                            : currentConversationMessages[0].sender?.email)
-                         : 'Chargement...')}
-                    </p>
+                <div className="p-3 sm:p-4 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white z-10">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    {/* Back button for mobile */}
+                    <button
+                      onClick={() => setSelectedConversation(null)}
+                      className="md:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
+                      aria-label="Retour aux conversations"
+                    >
+                      <ArrowLeft className="w-5 h-5 text-gray-600" />
+                    </button>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm sm:text-base lg:text-lg truncate">
+                        {currentConversation?.announcementTitle || 
+                         (messages.find(m => m.announcement_id === selectedConversation) as any)?.announcement?.title || 
+                         'Annonce'}
+                      </p>
+                      <p className="text-xs sm:text-sm text-gray-500 truncate">
+                        {currentConversation?.otherUserEmail || 
+                         (currentConversationMessages.length > 0 
+                           ? (currentConversationMessages[0].sender_id === user?.id 
+                              ? currentConversationMessages[0].recipient?.email 
+                              : currentConversationMessages[0].sender?.email)
+                           : 'Chargement...')}
+                      </p>
+                    </div>
                   </div>
                   <LinkIcon
-                    className="w-5 h-5 text-gray-400 hover:text-primary cursor-pointer"
+                    className="w-5 h-5 text-gray-400 hover:text-primary cursor-pointer flex-shrink-0"
                     onClick={() => router.push(`/annonces/${selectedConversation}`)}
                   />
                 </div>
@@ -544,21 +554,21 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
                                       alt="Photo partagée"
                                       width={300}
                                       height={300}
-                                      className="rounded-lg max-w-full h-auto"
+                                      className="rounded-lg max-w-full h-auto w-full"
                                       unoptimized
                                     />
                                   </div>
                                 )}
                                 {msg.location && (
-                                  <div className={`mb-2 flex items-center gap-2 ${isOwn ? 'text-white/90' : 'text-gray-600'}`}>
-                                    <MapPin className="w-4 h-4" />
+                                  <div className={`mb-2 flex items-center gap-1 sm:gap-2 ${isOwn ? 'text-white/90' : 'text-gray-600'}`}>
+                                    <MapPin className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
                                     <span className="text-xs">
                                       Localisation partagée
                                     </span>
                                   </div>
                                 )}
                                 {msg.content && (
-                                  <p className="text-sm whitespace-pre-wrap break-words">{msg.content}</p>
+                                  <p className="text-xs sm:text-sm whitespace-pre-wrap break-words">{msg.content}</p>
                                 )}
                                 <p className={`text-xs mt-1 ${
                                   isOwn ? 'text-white/70' : 'text-gray-500'
@@ -643,11 +653,11 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
                 </div>
               </>
             ) : (
-              <div className="flex-1 flex items-center justify-center text-gray-500">
+              <div className="flex-1 flex items-center justify-center text-gray-500 p-4">
                 <div className="text-center">
-                  <MessageCircle className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-                  <p className="text-lg font-medium">Sélectionnez une conversation</p>
-                  <p className="text-sm mt-2">ou créez-en une depuis une annonce</p>
+                  <MessageCircle className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 text-gray-300" />
+                  <p className="text-sm sm:text-base lg:text-lg font-medium">Sélectionnez une conversation</p>
+                  <p className="text-xs sm:text-sm mt-2">ou créez-en une depuis une annonce</p>
                 </div>
               </div>
             )}
