@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS support_tickets (
   priority VARCHAR(20) DEFAULT 'normal' CHECK (priority IN ('low', 'normal', 'high', 'urgent')),
   status VARCHAR(20) DEFAULT 'open' CHECK (status IN ('open', 'in_progress', 'resolved', 'closed')),
   assigned_to UUID REFERENCES auth.users(id) ON DELETE SET NULL,
-  admin_notes TEXT,
+  internal_notes TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
