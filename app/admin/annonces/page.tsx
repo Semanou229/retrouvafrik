@@ -42,9 +42,11 @@ export default async function AdminAnnoncesPage({
     }
 
     // Construire la requête
+    // Note: On ne peut pas utiliser la relation user:user_id car user_id est une référence à auth.users
+    // On récupère juste les annonces, l'email sera récupéré côté client si nécessaire
     let query = adminSupabase
       .from('announcements')
-      .select('*, user:user_id(email)')
+      .select('*')
       .order('created_at', { ascending: false })
 
     // Appliquer les filtres
