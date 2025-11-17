@@ -41,19 +41,40 @@ export default function SignupForm() {
     setLoading(true)
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/mon-compte`,
+        },
       })
 
-      if (error) throw error
+      if (error) {
+        // Gérer les erreurs spécifiques
+        if (error.message.includes('email rate limit')) {
+          throw new Error('Limite d\'envoi d\'emails atteinte. Veuillez réessayer dans quelques minutes.')
+        } else if (error.message.includes('sending confirmation email')) {
+          throw new Error('Erreur lors de l\'envoi de l\'email de confirmation. Vérifiez votre configuration SMTP dans Supabase.')
+        }
+        throw error
+      }
 
-      setSuccess(true)
-      setTimeout(() => {
-        router.push('/mon-compte')
-      }, 2000)
+      // Vérifier si l'email nécessite une confirmation
+      if (data.user && !data.session) {
+        setSuccess(true)
+        setError(null)
+        // Ne pas rediriger immédiatement, attendre la confirmation email
+        setTimeout(() => {
+          router.push('/connexion?message=Vérifiez votre email pour confirmer votre compte')
+        }, 3000)
+      } else {
+        setSuccess(true)
+        setTimeout(() => {
+          router.push('/mon-compte')
+        }, 2000)
+      }
     } catch (err: any) {
-      setError(err.message || 'Une erreur s\'est produite')
+      setError(err.message || 'Une erreur s\'est produite lors de la création du compte')
     } finally {
       setLoading(false)
     }
