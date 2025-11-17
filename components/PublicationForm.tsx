@@ -408,6 +408,21 @@ export default function PublicationForm() {
         }
       }
 
+      console.log('📝 [PublicationForm] Tentative d\'insertion annonce:', {
+        user_id: announcementData.user_id,
+        type: announcementData.type,
+        title: announcementData.title,
+        status: announcementData.status,
+      })
+      
+      // Vérifier la session avant l'insertion
+      const { data: { session } } = await supabase.auth.getSession()
+      console.log('🔐 [PublicationForm] Session utilisateur:', {
+        hasSession: !!session,
+        userId: session?.user?.id,
+        email: session?.user?.email,
+      })
+
       const { data: announcement, error: insertError } = await supabase
         .from('announcements')
         .insert([announcementData])
@@ -415,7 +430,13 @@ export default function PublicationForm() {
         .single()
 
       if (insertError) {
-        console.error('Insert error:', insertError)
+        console.error('❌ [PublicationForm] Insert error:', insertError)
+        console.error('❌ [PublicationForm] Détails erreur:', {
+          code: insertError.code,
+          message: insertError.message,
+          details: insertError.details,
+          hint: insertError.hint,
+        })
         throw new Error(insertError.message || 'Erreur lors de la création de l\'annonce')
       }
 
