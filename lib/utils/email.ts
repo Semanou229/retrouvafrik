@@ -28,11 +28,14 @@ export async function sendEmail({
   fromName?: string
 }): Promise<{ success: boolean; error?: string }> {
   try {
+    console.log('📧 [sendEmail] Début envoi email à:', to)
+    console.log('📧 [sendEmail] Sujet:', subject)
+    
     const smtpApiKey = process.env.SMTP_API_KEY
     const smtpApiEndpoint = process.env.SMTP_API_ENDPOINT || '/api/smtp/send'
 
     if (!smtpApiKey) {
-      console.error('SMTP_API_KEY not configured')
+      console.error('❌ [sendEmail] SMTP_API_KEY not configured')
       return { success: false, error: 'SMTP_API_KEY not configured' }
     }
 
@@ -41,21 +44,29 @@ export async function sendEmail({
       ? smtpApiEndpoint
       : `${process.env.NEXT_PUBLIC_SITE_URL || 'https://retrouvafrik.vercel.app'}${smtpApiEndpoint}`
 
+    console.log('📧 [sendEmail] Endpoint:', endpoint)
+
+    const emailPayload = {
+      email: {
+        from: from || `${fromName || 'RetrouvAfrik'} <${process.env.SMTP_FROM || 'noreply@retrouvafrik.com'}>`,
+        to,
+        subject,
+        html,
+      },
+    }
+
+    console.log('📧 [sendEmail] Payload:', JSON.stringify({ ...emailPayload, email: { ...emailPayload.email, html: '[HTML content]' } }))
+
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${smtpApiKey}`,
       },
-      body: JSON.stringify({
-        email: {
-          from: from || `${fromName || 'RetrouvAfrik'} <${process.env.SMTP_FROM || 'noreply@retrouvafrik.com'}>`,
-          to,
-          subject,
-          html,
-        },
-      }),
+      body: JSON.stringify(emailPayload),
     })
+
+    console.log('📧 [sendEmail] Response status:', response.status, response.statusText)
 
     if (!response.ok) {
       let errorData: any = {}
@@ -65,12 +76,15 @@ export async function sendEmail({
         const errorText = await response.text()
         errorData = { error: errorText }
       }
+      console.error('❌ [sendEmail] Erreur response:', errorData)
       throw new Error(errorData.error || 'Erreur lors de l\'envoi de l\'email')
     }
 
+    const result = await response.json()
+    console.log('✅ [sendEmail] Email envoyé avec succès:', result)
     return { success: true }
   } catch (error: any) {
-    console.error('Error sending email:', error)
+    console.error('❌ [sendEmail] Error sending email:', error)
     return { success: false, error: error.message || 'Erreur lors de l\'envoi de l\'email' }
   }
 }

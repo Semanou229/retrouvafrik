@@ -1,14 +1,17 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
-import { sendEmailToAdmin } from '@/lib/utils/email'
+import { sendEmailToAdmin, getAdminEmail } from '@/lib/utils/email'
 
 export const runtime = 'nodejs'
 
 export async function POST(request: Request) {
   try {
+    console.log('📧 [API] Notification admin - Nouvelle annonce')
     const { announcementId } = await request.json()
+    console.log('📧 [API] Announcement ID:', announcementId)
 
     if (!announcementId) {
+      console.error('❌ [API] ID d\'annonce manquant')
       return NextResponse.json(
         { error: 'ID d\'annonce manquant' },
         { status: 400 }
@@ -92,18 +95,23 @@ export async function POST(request: Request) {
       </html>
     `
 
+    console.log('📧 [API] Envoi email à admin:', getAdminEmail())
     const result = await sendEmailToAdmin({
       subject: `🔔 Nouvelle annonce à approuver - ${announcement.title}`,
       html: emailHtml,
     })
 
+    console.log('📧 [API] Résultat envoi email:', result)
+
     if (!result.success) {
+      console.error('❌ [API] Erreur envoi email:', result.error)
       return NextResponse.json(
         { error: result.error || 'Erreur lors de l\'envoi de l\'email' },
         { status: 500 }
       )
     }
 
+    console.log('✅ [API] Email envoyé avec succès à l\'administrateur')
     return NextResponse.json({
       success: true,
       message: 'Email envoyé à l\'administrateur',

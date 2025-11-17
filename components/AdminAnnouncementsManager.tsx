@@ -82,15 +82,21 @@ export default function AdminAnnouncementsManager({
 
       // Notifier l'utilisateur par email
       try {
-        await fetch('/api/notifications/user/announcement-approved', {
+        console.log('📧 [AdminAnnouncementsManager] Envoi notification utilisateur pour annonce approuvée:', id)
+        const notificationResponse = await fetch('/api/notifications/user/announcement-approved', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ announcementId: id }),
         })
+        const notificationResult = await notificationResponse.json()
+        console.log('📧 [AdminAnnouncementsManager] Résultat notification utilisateur:', notificationResult)
+        if (!notificationResponse.ok) {
+          console.error('❌ [AdminAnnouncementsManager] Erreur notification utilisateur:', notificationResult)
+        }
       } catch (notificationError) {
-        console.error('Erreur lors de l\'envoi de la notification utilisateur:', notificationError)
+        console.error('❌ [AdminAnnouncementsManager] Erreur lors de l\'envoi de la notification utilisateur:', notificationError)
       }
     } catch (err: any) {
       setError(err.message || 'Erreur lors de l\'approbation')

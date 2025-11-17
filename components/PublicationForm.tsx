@@ -316,15 +316,21 @@ export default function PublicationForm() {
 
       // Envoyer un email à l'admin pour approbation
       try {
-        await fetch('/api/notifications/admin/announcement', {
+        console.log('📧 [PublicationForm] Envoi notification admin pour annonce:', announcement.id)
+        const notificationResponse = await fetch('/api/notifications/admin/announcement', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ announcementId: announcement.id }),
         })
+        const notificationResult = await notificationResponse.json()
+        console.log('📧 [PublicationForm] Résultat notification admin:', notificationResult)
+        if (!notificationResponse.ok) {
+          console.error('❌ [PublicationForm] Erreur notification admin:', notificationResult)
+        }
       } catch (notificationError) {
-        console.error('Erreur lors de l\'envoi de la notification admin:', notificationError)
+        console.error('❌ [PublicationForm] Erreur lors de l\'envoi de la notification admin:', notificationError)
       }
 
       // Rediriger vers une page de confirmation d'attente d'approbation
