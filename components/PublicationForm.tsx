@@ -416,12 +416,19 @@ export default function PublicationForm() {
       })
       
       // Vérifier la session avant l'insertion
-      const { data: { session } } = await supabase.auth.getSession()
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
       console.log('🔐 [PublicationForm] Session utilisateur:', {
         hasSession: !!session,
         userId: session?.user?.id,
         email: session?.user?.email,
+        sessionError: sessionError?.message,
       })
+      
+      // Si l'utilisateur est connecté mais user_id est null, utiliser l'ID de la session
+      if (session?.user?.id && !announcementData.user_id) {
+        console.log('⚠️ [PublicationForm] Utilisateur connecté mais user_id null, utilisation de session.user.id')
+        announcementData.user_id = session.user.id
+      }
 
       const { data: announcement, error: insertError } = await supabase
         .from('announcements')
