@@ -423,7 +423,6 @@ export default function UserAccountView({
         <EditAnnouncementModal
           announcement={editingAnnouncement}
           onClose={() => setEditingAnnouncement(null)}
-          onUpdate={() => router.refresh()}
         />
       )}
     </div>
