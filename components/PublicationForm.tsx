@@ -422,12 +422,18 @@ export default function PublicationForm() {
         userId: session?.user?.id,
         email: session?.user?.email,
         sessionError: sessionError?.message,
+        currentUserId: user?.id,
+        announcementUserId: announcementData.user_id,
       })
       
-      // Si l'utilisateur est connecté mais user_id est null, utiliser l'ID de la session
-      if (session?.user?.id && !announcementData.user_id) {
-        console.log('⚠️ [PublicationForm] Utilisateur connecté mais user_id null, utilisation de session.user.id')
+      // Toujours utiliser l'ID de la session si l'utilisateur est authentifié
+      // Cela garantit que user_id correspond à auth.uid() pour RLS
+      if (session?.user?.id) {
+        console.log('✅ [PublicationForm] Utilisateur authentifié, utilisation de session.user.id:', session.user.id)
         announcementData.user_id = session.user.id
+      } else {
+        console.log('⚠️ [PublicationForm] Pas de session, création annonce anonyme (user_id = null)')
+        announcementData.user_id = null
       }
 
       const { data: announcement, error: insertError } = await supabase
