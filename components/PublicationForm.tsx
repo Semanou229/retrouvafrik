@@ -417,7 +417,12 @@ export default function PublicationForm() {
       
       // Utiliser l'API route serveur pour créer l'annonce
       // Cela garantit que le token d'authentification est correctement inclus
-      console.log('📝 [PublicationForm] Envoi requête API pour créer annonce')
+      console.log('📝 [PublicationForm] ⚠️ UTILISATION ROUTE API - Envoi requête API pour créer annonce')
+      console.log('📝 [PublicationForm] Données envoyées:', {
+        user_id: announcementData.user_id,
+        type: announcementData.type,
+        title: announcementData.title?.substring(0, 50),
+      })
       
       const apiResponse = await fetch('/api/announcements/create', {
         method: 'POST',
@@ -427,7 +432,10 @@ export default function PublicationForm() {
         body: JSON.stringify(announcementData),
       })
       
+      console.log('📝 [PublicationForm] Réponse API status:', apiResponse.status, apiResponse.statusText)
+      
       const apiResult = await apiResponse.json()
+      console.log('📝 [PublicationForm] Résultat API:', apiResult)
       
       if (!apiResponse.ok) {
         console.error('❌ [PublicationForm] Erreur API:', apiResult)
@@ -440,7 +448,7 @@ export default function PublicationForm() {
         throw new Error('L\'annonce n\'a pas pu être créée')
       }
       
-      console.log('✅ [PublicationForm] Annonce créée avec succès:', announcement.id)
+      console.log('✅ [PublicationForm] Annonce créée avec succès via API:', announcement.id)
 
       // Envoyer un email à l'admin pour approbation
       try {
