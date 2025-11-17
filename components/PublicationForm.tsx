@@ -1059,23 +1059,24 @@ export default function PublicationForm() {
       )}
 
       {/* Navigation buttons */}
-      <div className="flex justify-between mt-8">
+      <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-0 mt-6 sm:mt-8">
         {currentStep > 1 && (
           <button
             type="button"
             onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
-            className="flex items-center gap-2 px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            className="flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm sm:text-base w-full sm:w-auto order-2 sm:order-1"
           >
             <ArrowLeft className="w-4 h-4" />
-            Précédent
+            <span className="sm:inline">Précédent</span>
+            <span className="sm:hidden">Préc.</span>
           </button>
         )}
-        <div className={currentStep > 1 ? 'ml-auto' : 'ml-auto'}>
+        <div className={`${currentStep > 1 ? 'sm:ml-auto' : 'sm:ml-auto'} w-full sm:w-auto order-1 sm:order-2`}>
           {currentStep === 5 ? (
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex items-center gap-2 bg-primary text-white px-6 py-2 rounded-lg font-semibold hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center justify-center gap-2 bg-primary text-white px-4 sm:px-6 py-2.5 sm:py-2 rounded-lg font-semibold hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm sm:text-base w-full sm:w-auto"
             >
               {isSubmitting ? 'Publication...' : 'Publier l\'annonce'}
             </button>
@@ -1084,7 +1085,7 @@ export default function PublicationForm() {
               type="button"
               onClick={handleNext}
               disabled={isSubmitting || (currentStep === 1 && !selectedType)}
-              className="flex items-center gap-2 bg-primary text-white px-6 py-2 rounded-lg font-semibold hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center justify-center gap-2 bg-primary text-white px-4 sm:px-6 py-2.5 sm:py-2 rounded-lg font-semibold hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm sm:text-base w-full sm:w-auto"
             >
               Suivant
               <ArrowRight className="w-4 h-4" />
