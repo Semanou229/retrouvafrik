@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     // Récupérer l'annonce
     const { data: announcement, error: announcementError } = await supabase
       .from('announcements')
-      .select('id, title, type, user_id, created_at, location_country, location_city')
+      .select('id, title, type, user_id, created_at, last_location')
       .eq('id', announcementId)
       .single()
 
@@ -80,7 +80,7 @@ export async function POST(request: Request) {
               <p><span class="label">Titre :</span> ${announcement.title}</p>
               <p><span class="label">Type :</span> ${announcement.type === 'person' ? 'Personne' : announcement.type === 'animal' ? 'Animal' : 'Objet'}</p>
               <p><span class="label">Créée par :</span> ${userName} (${userEmail})</p>
-              ${announcement.location_country ? `<p><span class="label">Localisation :</span> ${announcement.location_city ? announcement.location_city + ', ' : ''}${announcement.location_country}</p>` : ''}
+              ${announcement.last_location?.country ? `<p><span class="label">Localisation :</span> ${announcement.last_location?.city ? announcement.last_location.city + ', ' : ''}${announcement.last_location.country}</p>` : ''}
               <p><span class="label">Date de création :</span> ${new Date(announcement.created_at).toLocaleString('fr-FR')}</p>
             </div>
 

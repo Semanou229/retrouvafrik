@@ -287,7 +287,7 @@ export default function PublicationForm() {
         contact_other: data.contact_other || null,
         contact_visibility: data.contact_visibility,
         user_id: user?.id || null,
-        status: 'active',
+        status: 'pending', // En attente d'approbation admin
         approved: false, // Nécessite l'approbation de l'admin
       }
 

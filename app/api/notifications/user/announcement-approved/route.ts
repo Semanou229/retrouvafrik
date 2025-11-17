@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     // Récupérer l'annonce
     const { data: announcement, error: announcementError } = await supabase
       .from('announcements')
-      .select('id, title, type, user_id, status')
+      .select('id, title, type, user_id, status, last_location, created_at')
       .eq('id', announcementId)
       .single()
 

@@ -99,25 +99,75 @@ export default function NotificationPreferences() {
         return // L'utilisateur a déjà des préférences
       }
 
-      // Récupérer le pays de l'utilisateur depuis ses métadonnées
-      const userCountry = user.user_metadata?.location_country || user.user_metadata?.country
+      // Récupérer le pays de l'utilisateur depuis ses métadonnées ou ses annonces
+      let userCountry = user.user_metadata?.location_country || user.user_metadata?.country
       
+      // Si pas de pays dans les métadonnées, chercher dans les annonces de l'utilisateur
+      if (!userCountry) {
+        try {
+          const { data: userAnnouncements } = await supabase
+            .from('announcements')
+            .select('last_location')
+            .eq('user_id', user.id)
+            .not('last_location', 'is', null)
+            .limit(1)
+            .single()
+          
+          if (userAnnouncements?.last_location?.country) {
+            userCountry = userAnnouncements.last_location.country
+          }
+        } catch (err) {
+          // Pas d'annonce ou erreur, on continue sans pays
+          console.log('Pas de pays trouvé dans les annonces')
+        }
+      }
+      
+      // Si toujours pas de pays, utiliser le pays depuis last_location des annonces récentes
+      if (!userCountry) {
+        try {
+          const { data: recentAnnouncements } = await supabase
+            .from('announcements')
+            .select('last_location')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false })
+            .limit(5)
+          
+          if (recentAnnouncements && recentAnnouncements.length > 0) {
+            const announcementWithCountry = recentAnnouncements.find(
+              (a: any) => a.last_location?.country
+            )
+            if (announcementWithCountry?.last_location?.country) {
+              userCountry = announcementWithCountry.last_location.country
+            }
+          }
+        } catch (err) {
+          console.error('Erreur récupération pays depuis annonces:', err)
+        }
+      }
+      
+      // Créer une préférence par défaut avec le pays trouvé
+      // Si pas de pays, on ne crée pas de préférence (l'utilisateur devra en créer une manuellement)
       if (userCountry) {
-        // Créer une préférence par défaut avec le pays de l'utilisateur
+        console.log('📧 [NotificationPreferences] Création préférence par défaut avec pays:', userCountry)
         const { error } = await supabase
           .from('user_notification_preferences')
           .insert({
             user_id: user.id,
             country: userCountry,
             city: null,
-            notify_on_new_announcement: true,
+            notify_on_new_announcement: true, // Par défaut, recevoir les emails sauf si décoché
             notify_on_same_city: false,
             notify_on_same_country: true,
           })
 
         if (!error) {
+          console.log('✅ [NotificationPreferences] Préférence par défaut créée')
           await loadPreferences()
+        } else {
+          console.error('❌ [NotificationPreferences] Erreur création préférence:', error)
         }
+      } else {
+        console.log('⚠️ [NotificationPreferences] Pas de pays trouvé pour créer préférence par défaut')
       }
     } catch (err) {
       console.error('Erreur lors de la création de la préférence par défaut:', err)

@@ -246,7 +246,7 @@ export default function PerduDeVueForm() {
         contact_other: data.contact_other || null,
         contact_visibility: data.contact_visibility,
         user_id: user?.id || null,
-        status: 'active',
+        status: 'pending', // En attente d'approbation admin
         is_lost_sight: true, // Marquer comme "perdu de vue"
         approved: false, // Nécessite l'approbation de l'admin
       }
