@@ -429,6 +429,7 @@ export default function PublicationForm() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // Inclure les cookies pour la session
         body: JSON.stringify(announcementData),
       })
       
