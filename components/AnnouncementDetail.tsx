@@ -579,6 +579,7 @@ export default function AnnouncementDetail({ announcement, comments: initialComm
       {showRecognitionModal && (
         <RecognitionModal
           announcementId={announcement.id}
+          announcementOwnerId={announcement.user_id}
           onClose={() => setShowRecognitionModal(false)}
         />
       )}

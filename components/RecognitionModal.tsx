@@ -8,11 +8,13 @@ import { useRouter } from 'next/navigation'
 
 interface RecognitionModalProps {
   announcementId: string
+  announcementOwnerId: string
   onClose: () => void
 }
 
 export default function RecognitionModal({
   announcementId,
+  announcementOwnerId,
   onClose,
 }: RecognitionModalProps) {
   const { user } = useAuth()
@@ -47,13 +49,8 @@ export default function RecognitionModal({
       return
     }
 
-    if (!message.trim()) {
-      setError('Veuillez décrire comment vous reconnaissez cette personne')
-      return
-    }
-
-    if (!contactEmail.trim()) {
-      setError('Veuillez fournir votre email de contact')
+    if (!message.trim() && !photo) {
+      setError('Veuillez fournir au moins un message ou une photo')
       return
     }
 
@@ -66,7 +63,7 @@ export default function RecognitionModal({
       // Upload photo if provided
       if (photo) {
         const fileExt = photo.name.split('.').pop()
-        const fileName = `recognitions/${announcementId}/${Date.now()}.${fileExt}`
+        const fileName = `${announcementId}/${Date.now()}.${fileExt}`
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('messages')
           .upload(fileName, photo)
@@ -80,25 +77,39 @@ export default function RecognitionModal({
         photoUrl = publicUrl
       }
 
-      // Créer la reconnaissance
-      const { error: recognitionError } = await supabase
-        .from('recognitions')
-        .insert([{
-          announcement_id: announcementId,
-          user_id: user.id,
-          message,
-          contact_email: contactEmail,
-          contact_phone: contactPhone || null,
-          photo_url: photoUrl,
-        }])
+      // Construire le message avec les informations de contact si fournies
+      let messageContent = message || 'Je reconnais cette personne'
+      if (contactEmail || contactPhone) {
+        messageContent += '\n\n📧 Coordonnées de contact:'
+        if (contactEmail) {
+          messageContent += `\nEmail: ${contactEmail}`
+        }
+        if (contactPhone) {
+          messageContent += `\nTéléphone: ${contactPhone}`
+        }
+      }
 
-      if (recognitionError) throw recognitionError
+      // Envoyer via le système de chat RetrouvAfrik (comme InformationModal)
+      const messageData: any = {
+        announcement_id: announcementId,
+        sender_id: user.id,
+        recipient_id: announcementOwnerId,
+        content: messageContent,
+        message_type: photo ? 'photo' : 'text',
+      }
 
+      if (photoUrl) messageData.photo_url = photoUrl
+
+      const { error: messageError } = await supabase
+        .from('messages')
+        .insert([messageData])
+
+      if (messageError) throw messageError
+
+      // Rediriger vers la page de chat (comme InformationModal)
       onClose()
+      router.push(`/messages?announcement=${announcementId}`)
       router.refresh()
-      
-      // Afficher un message de succès
-      alert('Merci ! Votre signalement a été envoyé. Le propriétaire de l\'annonce vous contactera si nécessaire.')
     } catch (err: any) {
       console.error('Error submitting recognition:', err)
       setError(err.message || 'Une erreur s\'est produite lors de l\'envoi')
@@ -155,11 +166,11 @@ export default function RecognitionModal({
             />
           </div>
 
-          {/* Contact Info */}
+          {/* Contact Info (optionnel) */}
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Votre email *
+                Votre email (optionnel)
               </label>
               <input
                 type="email"
@@ -167,8 +178,10 @@ export default function RecognitionModal({
                 onChange={(e) => setContactEmail(e.target.value)}
                 placeholder="votre.email@exemple.com"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                required
               />
+              <p className="text-xs text-gray-500 mt-1">
+                Votre email sera inclus dans le message si fourni
+              </p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -181,6 +194,9 @@ export default function RecognitionModal({
                 placeholder="+229 97 00 00 00"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
               />
+              <p className="text-xs text-gray-500 mt-1">
+                Votre téléphone sera inclus dans le message si fourni
+              </p>
             </div>
           </div>
 
