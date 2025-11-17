@@ -9,6 +9,7 @@ import UnreadMessagesBadge from './UnreadMessagesBadge'
 import AdBanner from './AdBanner'
 import { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
+import { getUserDisplayName } from '@/lib/utils/user'
 
 export default function Navigation() {
   const pathname = usePathname()
@@ -220,12 +221,17 @@ export default function Navigation() {
                   {profileMenuOpen && (
                     <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
                       <div className="px-4 py-3 border-b border-gray-200">
-                        <p className="text-sm font-semibold text-gray-900">{user.email}</p>
+                        <p className="text-sm font-semibold text-gray-900">{getUserDisplayName(user)}</p>
+                        <p className="text-xs text-gray-500 mt-1">{user.email}</p>
                       </div>
                       <Link
                         href="/profil"
-                        onClick={() => setProfileMenuOpen(false)}
-                        className={`flex items-center gap-3 px-4 py-2 text-sm font-medium transition-colors ${
+                        onClick={(e) => {
+                          e.preventDefault()
+                          setProfileMenuOpen(false)
+                          window.location.href = '/profil'
+                        }}
+                        className={`flex items-center gap-3 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
                           isActive('/profil')
                             ? 'bg-primary/10 text-primary'
                             : 'text-gray-700 hover:bg-gray-50'
@@ -236,11 +242,12 @@ export default function Navigation() {
                       </Link>
                       <div className="border-t border-gray-200 my-1" />
                       <button
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.preventDefault()
                           signOut()
                           setProfileMenuOpen(false)
                         }}
-                        className="flex items-center gap-3 w-full px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                        className="flex items-center gap-3 w-full px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
                       >
                         <LogOut className="w-4 h-4" />
                         <span>Déconnexion</span>
@@ -543,14 +550,22 @@ export default function Navigation() {
                 {!loading && user && (
                   <div className="border-t border-gray-200 p-4">
                     <button
-                      onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                      className="flex items-center gap-3 w-full px-4 py-3 rounded-lg font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        setProfileMenuOpen(!profileMenuOpen)
+                      }}
+                      className="flex items-center gap-3 w-full px-4 py-3 rounded-lg font-medium text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer touch-manipulation"
+                      style={{ WebkitTapHighlightColor: 'transparent' }}
                     >
-                      <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                      <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
                         <User className="w-5 h-5 text-primary" />
                       </div>
                       <div className="flex-1 min-w-0 text-left">
                         <p className="text-sm font-medium text-gray-900 truncate">
+                          {getUserDisplayName(user)}
+                        </p>
+                        <p className="text-xs text-gray-500 truncate">
                           {user.email}
                         </p>
                       </div>
@@ -561,26 +576,33 @@ export default function Navigation() {
                       <div className="pl-4 pt-2 space-y-1">
                         <Link
                           href="/profil"
-                          className={`flex items-center gap-3 px-4 py-2 rounded-lg font-medium transition-colors ${
+                          className={`flex items-center gap-3 px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer touch-manipulation ${
                             isActive('/profil')
                               ? 'bg-primary/10 text-primary'
                               : 'text-gray-700 hover:bg-gray-100'
                           }`}
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
                             setMobileMenuOpen(false)
                             setProfileMenuOpen(false)
+                            window.location.href = '/profil'
                           }}
+                          style={{ WebkitTapHighlightColor: 'transparent' }}
                         >
                           <User className="w-5 h-5" />
                           <span>Mon profil</span>
                         </Link>
                         <button
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
                             signOut()
                             setMobileMenuOpen(false)
                             setProfileMenuOpen(false)
                           }}
-                          className="flex items-center gap-3 w-full px-4 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+                          className="flex items-center gap-3 w-full px-4 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer touch-manipulation"
+                          style={{ WebkitTapHighlightColor: 'transparent' }}
                         >
                           <LogOut className="w-5 h-5" />
                           <span>Déconnexion</span>

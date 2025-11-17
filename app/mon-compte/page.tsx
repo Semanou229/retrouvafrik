@@ -18,6 +18,12 @@ export default async function MonComptePage() {
     redirect('/connexion')
   }
 
+  // Check if profile is complete, redirect to complete profile page if not
+  const metadata = session.user.user_metadata || {}
+  if (!metadata.first_name && !metadata.full_name) {
+    redirect('/completer-profil')
+  }
+
   // Fetch user's announcements
   const { data: announcements } = await supabase
     .from('announcements')

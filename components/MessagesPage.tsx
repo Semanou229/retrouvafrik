@@ -20,6 +20,7 @@ interface Conversation {
   announcementTitle: string
   otherUserId: string
   otherUserEmail: string
+  otherUserName: string
   lastMessage: Message
   unreadCount: number
 }
@@ -41,60 +42,63 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
   const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null)
   const [loadingEmails, setLoadingEmails] = useState(true)
+  const [userNamesCache, setUserNamesCache] = useState<Record<string, string>>({})
 
-  // Load user emails for messages that don't have them yet
+  // Load user names for messages
   useEffect(() => {
-    const loadUserEmails = async () => {
+    const loadUserNames = async () => {
       if (!user || messages.length === 0) {
         setLoadingEmails(false)
         return
       }
 
-      const messagesNeedingEmails = messages.filter(
-        msg => !msg.sender?.email || msg.sender.email === 'Chargement...' ||
-                !msg.recipient?.email || msg.recipient.email === 'Chargement...'
-      )
+      // Get unique user IDs from messages
+      const userIds = new Set<string>()
+      messages.forEach(msg => {
+        if (msg.sender_id) userIds.add(msg.sender_id)
+        if (msg.recipient_id) userIds.add(msg.recipient_id)
+      })
 
-      if (messagesNeedingEmails.length === 0) {
+      // Load names for users not in cache
+      const userIdsToLoad = Array.from(userIds).filter(id => {
+        // Check if we already have this user's name in cache
+        return !userNamesCache[id]
+      })
+      
+      if (userIdsToLoad.length === 0) {
         setLoadingEmails(false)
         return
       }
 
-      const messagesWithEmails = await Promise.all(
-        messages.map(async (msg) => {
-          // If emails are already loaded, skip
-          if (msg.sender?.email && msg.sender.email !== 'Chargement...' && 
-              msg.recipient?.email && msg.recipient.email !== 'Chargement...') {
-            return msg
-          }
-
+      try {
+        const namesPromises = userIdsToLoad.map(async (userId) => {
           try {
-            // Fetch emails using RPC function
-            const { data: senderEmail } = await supabase.rpc('get_user_email', { user_id: msg.sender_id })
-            const { data: recipientEmail } = await supabase.rpc('get_user_email', { user_id: msg.recipient_id })
-            
-            return {
-              ...msg,
-              sender: { email: senderEmail || 'Utilisateur inconnu' },
-              recipient: { email: recipientEmail || 'Utilisateur inconnu' },
-            }
+            const { data: displayName } = await supabase.rpc('get_user_display_name', { user_id_param: userId })
+            return { userId, displayName: displayName || 'Utilisateur' }
           } catch (err) {
-            console.error('Error loading emails:', err)
-            return {
-              ...msg,
-              sender: { email: msg.sender?.email || 'Utilisateur inconnu' },
-              recipient: { email: msg.recipient?.email || 'Utilisateur inconnu' },
-            }
+            console.error('Error loading user name:', err)
+            return { userId, displayName: 'Utilisateur' }
           }
         })
-      )
 
-      setMessages(messagesWithEmails)
+        const namesResults = await Promise.all(namesPromises)
+        setUserNamesCache(prevCache => {
+          const newCache = { ...prevCache }
+          namesResults.forEach(({ userId, displayName }) => {
+            newCache[userId] = displayName
+          })
+          return newCache
+        })
+      } catch (err) {
+        console.error('Error loading user names:', err)
+      }
+
       setLoadingEmails(false)
     }
 
-    loadUserEmails()
-  }, [user, supabase])
+    loadUserNames()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, messages.length])
 
   // Scroll to bottom when new messages arrive
   useEffect(() => {
@@ -239,9 +243,17 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
         otherUserEmail: msg.sender_id === user.id 
           ? (msg.recipient?.email || 'Utilisateur inconnu')
           : (msg.sender?.email || 'Utilisateur inconnu'),
+        otherUserName: userNamesCache[otherUserId] || (msg.sender_id === user.id 
+          ? (msg.recipient?.email || 'Utilisateur')
+          : (msg.sender?.email || 'Utilisateur')),
         lastMessage: msg,
         announcementTitle: (msg as any).announcement?.title || 'Annonce',
         unreadCount: 0,
+      }
+    } else {
+      // Update name if we have it in cache now
+      if (userNamesCache[otherUserId]) {
+        acc[key].otherUserName = userNamesCache[otherUserId]
       }
     }
     
@@ -501,7 +513,7 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
                     <div className="flex items-start justify-between">
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold text-sm truncate">{conv.announcementTitle}</p>
-                        <p className="text-xs text-gray-500 mt-1 truncate">{conv.otherUserEmail}</p>
+                        <p className="text-xs text-gray-500 mt-1 truncate">{conv.otherUserName || conv.otherUserEmail}</p>
                         <p className="text-xs text-gray-400 mt-1 line-clamp-1">
                           {conv.lastMessage.content}
                         </p>
@@ -542,11 +554,11 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
                          'Annonce'}
                       </p>
                       <p className="text-xs sm:text-sm text-gray-500 truncate mt-0.5">
-                        {currentConversation?.otherUserEmail || 
+                        {currentConversation?.otherUserName || 
                          (currentConversationMessages.length > 0 
                            ? (currentConversationMessages[0].sender_id === user?.id 
-                              ? currentConversationMessages[0].recipient?.email 
-                              : currentConversationMessages[0].sender?.email)
+                              ? (userNamesCache[currentConversationMessages[0].recipient_id] || currentConversationMessages[0].recipient?.email || 'Utilisateur')
+                              : (userNamesCache[currentConversationMessages[0].sender_id] || currentConversationMessages[0].sender?.email || 'Utilisateur'))
                            : 'Chargement...')}
                       </p>
                     </div>

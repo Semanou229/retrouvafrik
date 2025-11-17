@@ -41,10 +41,10 @@ export default function SignupForm() {
     setLoading(true)
 
     try {
-      // Utiliser une URL absolue pour la redirection
+      // Utiliser une URL absolue pour la redirection vers la complétion du profil
       const redirectUrl = typeof window !== 'undefined' 
-        ? `${window.location.origin}/mon-compte`
-        : 'https://retrouvafrik.vercel.app/mon-compte'
+        ? `${window.location.origin}/completer-profil`
+        : 'https://retrouvafrik.vercel.app/completer-profil'
       
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -74,8 +74,9 @@ export default function SignupForm() {
         }, 3000)
       } else {
         setSuccess(true)
+        // Rediriger vers la page de complétion du profil
         setTimeout(() => {
-          router.push('/mon-compte')
+          router.push('/completer-profil')
         }, 2000)
       }
     } catch (err: any) {
