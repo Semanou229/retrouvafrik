@@ -367,7 +367,7 @@ export default function NotificationPreferences() {
                           }
                           className="w-4 h-4 text-primary rounded focus:ring-primary"
                         />
-                        <span className="text-sm text-gray-700">Notifications activées</span>
+                        <span className="text-sm text-gray-700">Recevoir des emails pour les annonces d'autres utilisateurs</span>
                       </label>
 
                       {pref.city && (
