@@ -58,7 +58,13 @@ export async function sendEmail({
     })
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: await response.text() }))
+      let errorData: any = {}
+      try {
+        errorData = await response.json()
+      } catch {
+        const errorText = await response.text()
+        errorData = { error: errorText }
+      }
       throw new Error(errorData.error || 'Erreur lors de l\'envoi de l\'email')
     }
 
