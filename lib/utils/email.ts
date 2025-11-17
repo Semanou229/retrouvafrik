@@ -8,6 +8,7 @@ const ADMIN_EMAIL = 'hello@retrouvafrik.com'
  * Get admin email address
  */
 export function getAdminEmail(): string {
+  console.log('📧 [getAdminEmail] Email admin retourné:', ADMIN_EMAIL)
   return ADMIN_EMAIL
 }
 
@@ -99,8 +100,10 @@ export async function sendEmailToAdmin({
   subject: string
   html: string
 }): Promise<{ success: boolean; error?: string }> {
+  const adminEmail = getAdminEmail()
+  console.log('📧 [sendEmailToAdmin] Envoi email à admin:', adminEmail)
   return sendEmail({
-    to: getAdminEmail(),
+    to: adminEmail,
     subject,
     html,
   })
