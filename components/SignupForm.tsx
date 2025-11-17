@@ -41,11 +41,16 @@ export default function SignupForm() {
     setLoading(true)
 
     try {
+      // Utiliser une URL absolue pour la redirection
+      const redirectUrl = typeof window !== 'undefined' 
+        ? `${window.location.origin}/mon-compte`
+        : 'https://retrouvafrik.vercel.app/mon-compte'
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/mon-compte`,
+          emailRedirectTo: redirectUrl,
         },
       })
 
