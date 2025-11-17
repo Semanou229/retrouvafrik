@@ -1,26 +1,31 @@
 import { NextResponse } from 'next/server'
+import nodemailer from 'nodemailer'
 
 export const runtime = 'nodejs'
 
 export async function POST(request: Request) {
   try {
-    const { smtp, email } = await request.json()
+    const { email } = await request.json()
+
+    console.log('📧 [SMTP API] Début traitement email')
 
     // Vérifier la clé API
     const apiKey = request.headers.get('Authorization')?.replace('Bearer ', '')
     const expectedApiKey = process.env.SMTP_API_KEY
 
     if (!expectedApiKey || apiKey !== expectedApiKey) {
+      console.error('❌ [SMTP API] Non autorisé - clé API invalide')
       return NextResponse.json(
         { error: 'Non autorisé' },
         { status: 401 }
       )
     }
 
-    // Option 1: Utiliser Resend API (compatible Edge Runtime)
+    // Option 1: Utiliser Resend API si configuré
     const resendApiKey = process.env.RESEND_API_KEY
     if (resendApiKey) {
       try {
+        console.log('📧 [SMTP API] Tentative avec Resend')
         const resendResponse = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
@@ -35,73 +40,82 @@ export async function POST(request: Request) {
           }),
         })
 
-        if (!resendResponse.ok) {
-          const errorData = await resendResponse.json().catch(() => ({}))
-          throw new Error(errorData.message || 'Erreur Resend API')
+        if (resendResponse.ok) {
+          const result = await resendResponse.json()
+          console.log('✅ [SMTP API] Email envoyé via Resend')
+          return NextResponse.json({
+            success: true,
+            messageId: result.id,
+            provider: 'resend',
+          })
         }
-
-        const result = await resendResponse.json()
-        return NextResponse.json({
-          success: true,
-          messageId: result.id,
-          provider: 'resend',
-        })
       } catch (resendError: any) {
-        console.error('Erreur Resend:', resendError)
+        console.error('❌ [SMTP API] Erreur Resend:', resendError)
         // Continuer avec l'option 2 si Resend échoue
       }
     }
 
-    // Option 2: Utiliser Supabase Edge Function pour l'envoi SMTP
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    // Option 2: Utiliser SMTP direct avec nodemailer
+    const smtpHost = process.env.SMTP_HOST
+    const smtpPort = process.env.SMTP_PORT
+    const smtpUser = process.env.SMTP_USER
+    const smtpPassword = process.env.SMTP_PASSWORD
+    const smtpSecure = process.env.SMTP_SECURE === 'true'
 
-    if (supabaseUrl && supabaseAnonKey) {
+    if (smtpHost && smtpPort && smtpUser && smtpPassword) {
       try {
-        // Appeler une Edge Function Supabase qui gère l'envoi SMTP
-        // Note: Vous devrez créer cette Edge Function dans Supabase
-        const functionUrl = `${supabaseUrl}/functions/v1/send-email`
-        const response = await fetch(functionUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${supabaseAnonKey}`,
+        console.log('📧 [SMTP API] Tentative avec SMTP direct:', smtpHost)
+        
+        const transporter = nodemailer.createTransport({
+          host: smtpHost,
+          port: parseInt(smtpPort, 10),
+          secure: smtpSecure,
+          auth: {
+            user: smtpUser,
+            pass: smtpPassword,
           },
-          body: JSON.stringify({
-            to: email.to,
-            subject: email.subject,
-            html: email.html,
-            from: email.from || `${process.env.SMTP_FROM_NAME || 'RetrouvAfrik'} <${process.env.SMTP_FROM || 'noreply@retrouvafrik.com'}>`,
-          }),
         })
 
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}))
-          throw new Error(errorData.error || 'Erreur Edge Function')
+        const mailOptions = {
+          from: email.from || `${process.env.SMTP_FROM_NAME || 'RetrouvAfrik'} <${process.env.SMTP_FROM || smtpUser}>`,
+          to: email.to,
+          subject: email.subject,
+          html: email.html,
         }
 
-        const result = await response.json()
+        console.log('📧 [SMTP API] Envoi email à:', email.to)
+        const info = await transporter.sendMail(mailOptions)
+        
+        console.log('✅ [SMTP API] Email envoyé via SMTP direct:', info.messageId)
         return NextResponse.json({
           success: true,
-          messageId: result.messageId,
-          provider: 'supabase-edge-function',
+          messageId: info.messageId,
+          provider: 'smtp-direct',
         })
-      } catch (supabaseError: any) {
-        console.error('Erreur Supabase Edge Function:', supabaseError)
-        // Continuer avec l'option 3 si Supabase échoue
+      } catch (smtpError: any) {
+        console.error('❌ [SMTP API] Erreur SMTP direct:', smtpError)
+        return NextResponse.json(
+          { 
+            error: 'Erreur lors de l\'envoi SMTP',
+            details: smtpError.message || 'Erreur inconnue',
+            hint: 'Vérifiez vos paramètres SMTP (host, port, user, password)'
+          },
+          { status: 500 }
+        )
       }
     }
 
     // Option 3: Retourner une erreur si aucune option n'est disponible
+    console.error('❌ [SMTP API] Aucune configuration SMTP trouvée')
     return NextResponse.json(
       {
-        error: 'Aucun service d\'envoi d\'email configuré. Configurez RESEND_API_KEY ou créez une Edge Function Supabase pour l\'envoi SMTP.',
-        hint: 'Pour utiliser Resend: ajoutez RESEND_API_KEY dans vos variables d\'environnement. Pour utiliser SMTP via Supabase: créez une Edge Function dans supabase/functions/send-email/',
+        error: 'Aucun service d\'envoi d\'email configuré.',
+        hint: 'Configurez soit RESEND_API_KEY, soit SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD dans vos variables d\'environnement Vercel.',
       },
       { status: 503 }
     )
   } catch (error: any) {
-    console.error('Erreur API SMTP:', error)
+    console.error('❌ [SMTP API] Erreur générale:', error)
     return NextResponse.json(
       { error: error.message || 'Erreur lors de l\'envoi de l\'email' },
       { status: 500 }
