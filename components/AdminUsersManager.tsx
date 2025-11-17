@@ -22,6 +22,7 @@ import {
   Eye,
 } from 'lucide-react'
 import Link from 'next/link'
+import { getUserDisplayName, getUserFullName } from '@/lib/utils/user'
 
 interface User {
   id: string
@@ -30,6 +31,8 @@ interface User {
   user_metadata?: {
     role?: string
     full_name?: string
+    first_name?: string
+    last_name?: string
   }
 }
 
@@ -101,7 +104,11 @@ export default function AdminUsersManager({
       filtered = filtered.filter(
         u =>
           u.email?.toLowerCase().includes(query) ||
-          u.user_metadata?.full_name?.toLowerCase().includes(query)
+          u.user_metadata?.full_name?.toLowerCase().includes(query) ||
+          u.user_metadata?.first_name?.toLowerCase().includes(query) ||
+          u.user_metadata?.last_name?.toLowerCase().includes(query) ||
+          getUserDisplayName(u).toLowerCase().includes(query) ||
+          getUserFullName(u).toLowerCase().includes(query)
       )
     }
 
@@ -344,10 +351,20 @@ export default function AdminUsersManager({
                           <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
                             <Users className="w-5 h-5 text-primary" />
                           </div>
-                          <div>
-                            <p className="font-bold text-lg">{user.email}</p>
-                            {user.user_metadata?.full_name && (
-                              <p className="text-sm text-gray-600">{user.user_metadata.full_name}</p>
+                          <div className="flex-1">
+                            {/* Nom et prénom */}
+                            {(getUserFullName(user) !== 'Utilisateur' && getUserFullName(user) !== user.email?.split('@')[0]) ? (
+                              <>
+                                <p className="font-bold text-lg text-gray-900">
+                                  {getUserFullName(user)}
+                                </p>
+                                <p className="text-sm text-gray-600 flex items-center gap-1">
+                                  <Mail className="w-3 h-3" />
+                                  {user.email}
+                                </p>
+                              </>
+                            ) : (
+                              <p className="font-bold text-lg text-gray-900">{user.email || 'Utilisateur'}</p>
                             )}
                           </div>
                           {isAdmin && (

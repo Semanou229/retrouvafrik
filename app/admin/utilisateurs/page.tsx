@@ -1,10 +1,11 @@
 import Navigation from '@/components/Navigation'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { createAdminSupabaseClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import AdminUsersManager from '@/components/AdminUsersManager'
 
 export const dynamic = 'force-dynamic'
-export const runtime = 'edge'
+export const runtime = 'nodejs'
 
 export default async function AdminUtilisateursPage() {
   const supabase = createServerSupabaseClient()
@@ -24,33 +25,50 @@ export default async function AdminUtilisateursPage() {
     redirect('/mon-compte')
   }
 
-  // Récupérer les utilisateurs depuis les annonces (méthode alternative)
-  const { data: announcements } = await supabase
-    .from('announcements')
-    .select('user_id')
-    .not('user_id', 'is', null)
+  // Utiliser le client admin pour récupérer tous les utilisateurs
+  const adminSupabase = createAdminSupabaseClient()
+  if (!adminSupabase) {
+    redirect('/admin')
+  }
+
+  // Récupérer tous les utilisateurs depuis Supabase Auth
+  let users: any[] = []
+  try {
+    const { data, error: usersError } = await adminSupabase.auth.admin.listUsers()
+    if (!usersError && data) {
+      users = data.users.map((u: any) => ({
+        id: u.id,
+        email: u.email || '',
+        created_at: u.created_at || new Date().toISOString(),
+        user_metadata: u.user_metadata || {},
+      }))
+    }
+  } catch (err) {
+    console.error('Error fetching users:', err)
+  }
 
   // Récupérer les statuts des utilisateurs
   const { data: userStatuses } = await supabase
     .from('user_status')
     .select('*')
 
-  // Récupérer les statistiques par utilisateur
-  const { data: userStats } = await supabase
+  // Récupérer les statistiques par utilisateur (nombre d'annonces)
+  const { data: announcements } = await supabase
     .from('announcements')
     .select('user_id')
     .not('user_id', 'is', null)
 
-  // Créer une liste unique d'utilisateurs depuis les annonces
-  const uniqueUserIds = Array.from(new Set(announcements?.map(a => a.user_id) || []))
-  
-  // Pour chaque utilisateur, récupérer les infos de base
-  // Note: En production, utilisez l'API admin de Supabase avec les bonnes permissions
-  const users = uniqueUserIds.map(userId => ({
-    id: userId,
-    email: 'user@example.com', // Sera remplacé par les vraies données
-    created_at: new Date().toISOString(),
-    user_metadata: {},
+  // Créer un map des stats par user_id
+  const userStatsMap = new Map<string, number>()
+  announcements?.forEach((announcement) => {
+    const count = userStatsMap.get(announcement.user_id) || 0
+    userStatsMap.set(announcement.user_id, count + 1)
+  })
+
+  // Convertir en format attendu par le composant
+  const userStats = Array.from(userStatsMap.entries()).map(([user_id, count]) => ({
+    user_id,
+    count,
   }))
 
   return (
