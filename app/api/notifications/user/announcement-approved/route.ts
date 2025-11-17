@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { createClient } from '@supabase/supabase-js'
 import { sendEmailToUser } from '@/lib/utils/email'
 
 export const runtime = 'nodejs'
@@ -15,10 +15,29 @@ export async function POST(request: Request) {
       )
     }
 
-    const supabase = createServerSupabaseClient()
+    // Utiliser le service role key pour contourner RLS
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    if (!serviceRoleKey) {
+      console.error('❌ [API] SUPABASE_SERVICE_ROLE_KEY non définie')
+      return NextResponse.json(
+        { error: 'Configuration serveur manquante' },
+        { status: 500 }
+      )
+    }
 
-    // Récupérer l'annonce
-    const { data: announcement, error: announcementError } = await supabase
+    const adminSupabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      serviceRoleKey,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+        },
+      }
+    )
+
+    // Récupérer l'annonce avec le client admin (contourne RLS)
+    const { data: announcement, error: announcementError } = await adminSupabase
       .from('announcements')
       .select('id, title, type, user_id, status, last_location, created_at')
       .eq('id', announcementId)
@@ -49,7 +68,7 @@ export async function POST(request: Request) {
     let userEmail: string | null = null
     let userName = 'Utilisateur'
     try {
-      const { data: userData } = await supabase.auth.admin.getUserById(announcement.user_id)
+      const { data: userData } = await adminSupabase.auth.admin.getUserById(announcement.user_id)
       if (userData?.user) {
         userEmail = userData.user.email || null
         const metadata = userData.user.user_metadata || {}
