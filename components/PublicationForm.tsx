@@ -277,13 +277,33 @@ export default function PublicationForm() {
       isValid = true
     } else if (currentStep === 2) {
       // Étape 2: Informations essentielles
+      const currentType = watch('type')
+      const currentMode = watch('mode')
+      
+      // Valider les champs de base
       fieldsToValidate.push('title', 'description', 'disappearance_date', 'country', 'city', 'urgency')
-      if (watch('type') === 'object') {
+      
+      // Si c'est un objet, valider aussi le mode
+      if (currentType === 'object') {
         fieldsToValidate.push('mode')
-        if (watch('mode') === 'trouve') {
+        // Si objet trouvé, valider aussi le secret_detail
+        if (currentMode === 'trouve') {
           fieldsToValidate.push('secret_detail')
         }
       }
+      
+      console.log('📋 [PublicationForm] Champs à valider pour étape 2:', fieldsToValidate)
+      console.log('📋 [PublicationForm] Valeurs actuelles:', {
+        type: currentType,
+        mode: currentMode,
+        title: watch('title'),
+        description: watch('description'),
+        disappearance_date: watch('disappearance_date'),
+        country: watch('country'),
+        city: watch('city'),
+        urgency: watch('urgency'),
+        secret_detail: watch('secret_detail'),
+      })
     } else if (currentStep === 3) {
       // Étape 3: Photos & Vidéos (pas de validation obligatoire)
       isValid = true
@@ -295,6 +315,40 @@ export default function PublicationForm() {
     if (fieldsToValidate.length > 0) {
       isValid = await trigger(fieldsToValidate as any)
       console.log('📋 [PublicationForm] Validation des champs:', fieldsToValidate, 'Résultat:', isValid)
+      
+      // Si la validation échoue, vérifier quels champs ont des erreurs
+      if (!isValid) {
+        const errorMessages: string[] = []
+        const values = watch()
+        
+        // Vérifier chaque champ individuellement
+        for (const field of fieldsToValidate) {
+          const fieldError = errors[field as keyof typeof errors]
+          if (fieldError) {
+            errorMessages.push(fieldError.message as string)
+          } else if (!values[field as keyof FormData]) {
+            // Si le champ est vide et n'a pas d'erreur spécifique
+            const fieldLabel: Record<string, string> = {
+              title: 'Le titre',
+              description: 'La description',
+              disappearance_date: 'La date',
+              country: 'Le pays',
+              city: 'La ville',
+              urgency: 'L\'urgence',
+              mode: 'Le mode (perdu/trouvé)',
+              secret_detail: 'Le détail secret',
+            }
+            errorMessages.push(`${fieldLabel[field] || field} est obligatoire`)
+          }
+        }
+        
+        if (errorMessages.length > 0) {
+          setError(errorMessages[0]) // Afficher la première erreur
+        } else {
+          setError('Veuillez remplir tous les champs obligatoires')
+        }
+        return // Ne pas passer à l'étape suivante
+      }
     }
 
     if (isValid) {
@@ -303,7 +357,9 @@ export default function PublicationForm() {
       setCurrentStep(currentStep + 1)
     } else {
       console.log('❌ [PublicationForm] Validation échouée')
-      setError('Veuillez remplir tous les champs obligatoires')
+      if (!error) {
+        setError('Veuillez remplir tous les champs obligatoires')
+      }
     }
   }
 
