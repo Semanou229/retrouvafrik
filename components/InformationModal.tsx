@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { X, Send, Image as ImageIcon, MapPin, Loader2 } from 'lucide-react'
+import { X, Send, Image as ImageIcon, Loader2 } from 'lucide-react'
 import { useAuth } from '@/app/providers'
 import { createSupabaseClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
@@ -26,7 +26,6 @@ export default function InformationModal({
   const [message, setMessage] = useState('')
   const [photo, setPhoto] = useState<File | null>(null)
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
-  const [location, setLocation] = useState<{ lat: number; lng: number; address?: string } | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [useChat, setUseChat] = useState(true)
@@ -43,29 +42,6 @@ export default function InformationModal({
     }
   }
 
-  const getCurrentLocation = () => {
-    if (!navigator.geolocation) {
-      setError('La géolocalisation n\'est pas supportée par votre navigateur')
-      return
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords
-        
-        // Optionnel: obtenir l'adresse via une API de géocodage inverse
-        // Pour l'instant, on utilise juste les coordonnées
-        setLocation({
-          lat: latitude,
-          lng: longitude,
-        })
-      },
-      (err) => {
-        setError('Impossible d\'obtenir votre localisation: ' + err.message)
-      }
-    )
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
@@ -74,8 +50,8 @@ export default function InformationModal({
       return
     }
 
-    if (!message.trim() && !photo && !location) {
-      setError('Veuillez fournir au moins un message, une photo ou une localisation')
+    if (!message.trim() && !photo) {
+      setError('Veuillez fournir au moins un message ou une photo')
       return
     }
 
@@ -109,11 +85,10 @@ export default function InformationModal({
           sender_id: user.id,
           recipient_id: announcementOwnerId,
           content: message || 'J\'ai une information concernant cette annonce',
-          message_type: photo ? 'photo' : location ? 'location' : 'text',
+          message_type: photo ? 'photo' : 'text',
         }
 
         if (photoUrl) messageData.photo_url = photoUrl
-        if (location) messageData.location = location
 
         const { error: messageError } = await supabase
           .from('messages')
@@ -133,9 +108,8 @@ export default function InformationModal({
             sender_id: user.id,
             recipient_id: announcementOwnerId,
             content: message || 'J\'ai une information concernant cette annonce',
-            message_type: photo ? 'photo' : location ? 'location' : 'text',
+            message_type: photo ? 'photo' : 'text',
             photo_url: photoUrl,
-            location: location,
           }])
 
         if (messageError) throw messageError
@@ -230,42 +204,6 @@ export default function InformationModal({
                 )}
               </label>
             </div>
-          </div>
-
-          {/* Location */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Localisation (optionnel)
-            </label>
-            {location ? (
-              <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-5 h-5 text-primary" />
-                  <div>
-                    <p className="font-semibold">Localisation enregistrée</p>
-                    <p className="text-sm text-gray-600">
-                      {location.lat.toFixed(6)}, {location.lng.toFixed(6)}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setLocation(null)}
-                  className="text-red-600 hover:text-red-700"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={getCurrentLocation}
-                className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <MapPin className="w-5 h-5" />
-                <span>Partager ma localisation</span>
-              </button>
-            )}
           </div>
 
           {/* Send method */}

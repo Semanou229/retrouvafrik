@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { X, Send, Image as ImageIcon, MapPin, Loader2, UserCheck } from 'lucide-react'
+import { X, Send, Image as ImageIcon, Loader2, UserCheck } from 'lucide-react'
 import { useAuth } from '@/app/providers'
 import { createSupabaseClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
@@ -24,7 +24,6 @@ export default function RecognitionModal({
   const [contactPhone, setContactPhone] = useState('')
   const [photo, setPhoto] = useState<File | null>(null)
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
-  const [location, setLocation] = useState<{ lat: number; lng: number; address?: string } | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -38,26 +37,6 @@ export default function RecognitionModal({
       }
       reader.readAsDataURL(file)
     }
-  }
-
-  const getCurrentLocation = () => {
-    if (!navigator.geolocation) {
-      setError('La géolocalisation n\'est pas supportée par votre navigateur')
-      return
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords
-        setLocation({
-          lat: latitude,
-          lng: longitude,
-        })
-      },
-      (err) => {
-        setError('Impossible d\'obtenir votre localisation: ' + err.message)
-      }
-    )
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -111,7 +90,6 @@ export default function RecognitionModal({
           contact_email: contactEmail,
           contact_phone: contactPhone || null,
           photo_url: photoUrl,
-          location: location,
         }])
 
       if (recognitionError) throw recognitionError
@@ -252,45 +230,6 @@ export default function RecognitionModal({
                 )}
               </label>
             </div>
-          </div>
-
-          {/* Location */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Localisation (optionnel)
-            </label>
-            <p className="text-sm text-gray-500 mb-2">
-              Où avez-vous vu cette personne ?
-            </p>
-            {location ? (
-              <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-5 h-5 text-primary" />
-                  <div>
-                    <p className="font-semibold">Localisation enregistrée</p>
-                    <p className="text-sm text-gray-600">
-                      {location.lat.toFixed(6)}, {location.lng.toFixed(6)}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setLocation(null)}
-                  className="text-red-600 hover:text-red-700"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={getCurrentLocation}
-                className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <MapPin className="w-5 h-5" />
-                <span>Partager ma localisation</span>
-              </button>
-            )}
           </div>
 
           {/* Actions */}
