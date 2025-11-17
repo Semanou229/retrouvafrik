@@ -415,27 +415,50 @@ export default function PublicationForm() {
         status: announcementData.status,
       })
       
-      // Vérifier la session avant l'insertion
+      // Vérifier et rafraîchir la session avant l'insertion
+      // Utiliser getUser() pour s'assurer que le token est valide
+      const { data: { user: authUser }, error: userError } = await supabase.auth.getUser()
       const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-      console.log('🔐 [PublicationForm] Session utilisateur:', {
+      
+      console.log('🔐 [PublicationForm] Vérification authentification:', {
+        hasUser: !!authUser,
+        userId: authUser?.id,
+        email: authUser?.email,
         hasSession: !!session,
-        userId: session?.user?.id,
-        email: session?.user?.email,
+        sessionUserId: session?.user?.id,
+        sessionAccessToken: session?.access_token ? 'présent' : 'absent',
+        userError: userError?.message,
         sessionError: sessionError?.message,
         currentUserId: user?.id,
         announcementUserId: announcementData.user_id,
       })
       
-      // Toujours utiliser l'ID de la session si l'utilisateur est authentifié
-      // Cela garantit que user_id correspond à auth.uid() pour RLS
-      if (session?.user?.id) {
-        console.log('✅ [PublicationForm] Utilisateur authentifié, utilisation de session.user.id:', session.user.id)
+      // Si getUser() échoue, essayer de rafraîchir la session
+      if (userError && !authUser) {
+        console.warn('⚠️ [PublicationForm] getUser() a échoué, tentative de rafraîchissement...')
+        const { data: { session: refreshedSession }, error: refreshError } = await supabase.auth.refreshSession()
+        if (refreshedSession?.user?.id) {
+          console.log('✅ [PublicationForm] Session rafraîchie:', refreshedSession.user.id)
+          announcementData.user_id = refreshedSession.user.id
+        } else {
+          console.error('❌ [PublicationForm] Impossible de rafraîchir la session:', refreshError)
+          throw new Error('Session expirée. Veuillez vous reconnecter.')
+        }
+      } else if (authUser?.id) {
+        // Utiliser l'ID de l'utilisateur authentifié
+        console.log('✅ [PublicationForm] Utilisateur authentifié, utilisation de authUser.id:', authUser.id)
+        announcementData.user_id = authUser.id
+      } else if (session?.user?.id) {
+        // Fallback sur la session si getUser() n'a pas fonctionné
+        console.log('✅ [PublicationForm] Utilisation de session.user.id:', session.user.id)
         announcementData.user_id = session.user.id
       } else {
         console.log('⚠️ [PublicationForm] Pas de session, création annonce anonyme (user_id = null)')
         announcementData.user_id = null
       }
 
+      // S'assurer que le client Supabase a bien le token d'authentification
+      // En forçant une requête avec le header Authorization
       const { data: announcement, error: insertError } = await supabase
         .from('announcements')
         .insert([announcementData])
