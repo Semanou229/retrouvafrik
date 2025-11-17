@@ -5,20 +5,17 @@
 -- Supprimer l'ancienne politique
 DROP POLICY IF EXISTS "Users can create announcements" ON announcements;
 
--- Créer une nouvelle politique qui permet :
--- 1. Les utilisateurs authentifiés de créer des annonces avec leur user_id
--- 2. Les utilisateurs non authentifiés de créer des annonces anonymes (user_id = null)
+-- Créer une politique simple et permissive
+-- Permet :
+-- 1. Tous les utilisateurs authentifiés de créer des annonces (avec ou sans user_id)
+-- 2. Les utilisateurs non authentifiés de créer des annonces anonymes (user_id doit être null)
 CREATE POLICY "Users can create announcements"
   ON announcements FOR INSERT
   WITH CHECK (
-    -- Si user_id est défini, l'utilisateur doit être authentifié et être le propriétaire
-    (announcements.user_id IS NOT NULL AND auth.uid() = announcements.user_id)
+    -- Si l'utilisateur est authentifié, il peut créer n'importe quelle annonce
+    auth.uid() IS NOT NULL
     OR
-    -- Si user_id est null, permettre l'insertion (annonce anonyme)
-    (announcements.user_id IS NULL)
+    -- Si l'utilisateur n'est pas authentifié, il ne peut créer que des annonces anonymes
+    (auth.uid() IS NULL AND announcements.user_id IS NULL)
   );
-
--- S'assurer que les utilisateurs authentifiés peuvent aussi créer des annonces avec user_id null
--- (pour permettre la création d'annonces anonymes même quand connecté)
--- La politique ci-dessus le permet déjà
 
