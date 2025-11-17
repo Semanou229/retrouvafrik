@@ -121,6 +121,7 @@ export default function PublicationForm() {
     register,
     handleSubmit,
     watch,
+    trigger,
     formState: { errors },
     setValue,
   } = useForm<FormData>({
@@ -255,11 +256,59 @@ export default function PublicationForm() {
     return uploadedUrls
   }
 
-  const onSubmit = async (data: FormData) => {
-    if (currentStep < 5) {
-      setCurrentStep(currentStep + 1)
-      return
+  const handleNext = async (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
     }
+
+    console.log('🔵 [PublicationForm] handleNext appelé, étape actuelle:', currentStep)
+
+    // Valider uniquement les champs de l'étape actuelle
+    let isValid = true
+    const fieldsToValidate: (keyof FormData)[] = []
+
+    if (currentStep === 1) {
+      // Étape 1: Type d'annonce (pas de validation nécessaire, juste selectedType)
+      if (!selectedType) {
+        setError('Veuillez sélectionner un type d\'annonce')
+        return
+      }
+      isValid = true
+    } else if (currentStep === 2) {
+      // Étape 2: Informations essentielles
+      fieldsToValidate.push('title', 'description', 'disappearance_date', 'country', 'city', 'urgency')
+      if (watch('type') === 'object') {
+        fieldsToValidate.push('mode')
+        if (watch('mode') === 'trouve') {
+          fieldsToValidate.push('secret_detail')
+        }
+      }
+    } else if (currentStep === 3) {
+      // Étape 3: Photos & Vidéos (pas de validation obligatoire)
+      isValid = true
+    } else if (currentStep === 4) {
+      // Étape 4: Coordonnées
+      fieldsToValidate.push('contact_email', 'contact_visibility')
+    }
+
+    if (fieldsToValidate.length > 0) {
+      isValid = await trigger(fieldsToValidate as any)
+      console.log('📋 [PublicationForm] Validation des champs:', fieldsToValidate, 'Résultat:', isValid)
+    }
+
+    if (isValid) {
+      console.log('✅ [PublicationForm] Validation réussie, passage à l\'étape suivante')
+      setError(null)
+      setCurrentStep(currentStep + 1)
+    } else {
+      console.log('❌ [PublicationForm] Validation échouée')
+      setError('Veuillez remplir tous les champs obligatoires')
+    }
+  }
+
+  const onSubmit = async (data: FormData) => {
+    // Cette fonction est appelée uniquement à l'étape 5 (soumission finale)
 
     setIsSubmitting(true)
     setError(null)
@@ -928,22 +977,25 @@ export default function PublicationForm() {
           </button>
         )}
         <div className={currentStep > 1 ? 'ml-auto' : 'ml-auto'}>
-          <button
-            type="submit"
-            disabled={isSubmitting || (currentStep === 1 && !selectedType)}
-            className="flex items-center gap-2 bg-primary text-white px-6 py-2 rounded-lg font-semibold hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {currentStep === 5 ? (
-              <>
-                {isSubmitting ? 'Publication...' : 'Publier l\'annonce'}
-              </>
-            ) : (
-              <>
-                Suivant
-                <ArrowRight className="w-4 h-4" />
-              </>
-            )}
-          </button>
+          {currentStep === 5 ? (
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="flex items-center gap-2 bg-primary text-white px-6 py-2 rounded-lg font-semibold hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {isSubmitting ? 'Publication...' : 'Publier l\'annonce'}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleNext}
+              disabled={isSubmitting || (currentStep === 1 && !selectedType)}
+              className="flex items-center gap-2 bg-primary text-white px-6 py-2 rounded-lg font-semibold hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              Suivant
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          )}
         </div>
       </div>
     </form>
