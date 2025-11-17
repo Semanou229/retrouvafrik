@@ -274,6 +274,10 @@ export default function PublicationForm() {
         setError('Veuillez sélectionner un type d\'annonce')
         return
       }
+      // S'assurer que le type est bien enregistré dans le formulaire
+      if (selectedType && !watch('type')) {
+        setValue('type', selectedType as 'person' | 'animal' | 'object')
+      }
       isValid = true
     } else if (currentStep === 2) {
       // Étape 2: Informations essentielles
