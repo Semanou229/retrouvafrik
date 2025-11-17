@@ -93,11 +93,11 @@ export default function AdminUserMessagesPage({
     if (!acc[key]) {
       acc[key] = {
         announcementId: key,
-        announcementTitle: (msg.announcement as any)?.title || 'Annonce supprimée',
+        announcementTitle: msg.announcement?.title || 'Annonce supprimée',
         otherUserId: msg.sender_id === userId ? msg.recipient_id : msg.sender_id,
         otherUserEmail: msg.sender_id === userId 
-          ? (msg.recipient as any)?.email || 'Utilisateur inconnu'
-          : (msg.sender as any)?.email || 'Utilisateur inconnu',
+          ? msg.recipient?.email || 'Utilisateur inconnu'
+          : msg.sender?.email || 'Utilisateur inconnu',
         lastMessage: msg,
         unreadCount: 0,
       }
@@ -130,14 +130,17 @@ export default function AdminUserMessagesPage({
     setIsSending(true)
 
     try {
-      // Get announcement to find recipient
-      const announcement = conversationMessages[0]?.announcement as any
-      if (!announcement) {
-        throw new Error('Annonce introuvable')
+      // Determine recipient (the other user in the conversation)
+      // If userId is the sender, recipient is recipient_id, otherwise sender_id
+      const lastMessage = conversationMessages[conversationMessages.length - 1]
+      if (!lastMessage) {
+        throw new Error('Aucun message dans cette conversation')
       }
 
-      // Determine recipient (the owner of the announcement)
-      const recipientId = announcement.user_id || conversationMessages[0]?.recipient_id
+      // Determine recipient: if userId sent the last message, recipient is recipient_id, otherwise sender_id
+      const recipientId = lastMessage.sender_id === userId 
+        ? lastMessage.recipient_id 
+        : lastMessage.sender_id
 
       let photoUrl = null
       if (selectedPhoto) {

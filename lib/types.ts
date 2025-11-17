@@ -97,6 +97,11 @@ export interface Message {
   recipient?: {
     email: string
   }
+  announcement?: {
+    id: string
+    title: string
+    type?: string
+  }
 }
 
 export interface Recognition {
