@@ -1,11 +1,39 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 
 export const runtime = 'nodejs'
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createServerSupabaseClient()
+    const cookieStore = cookies()
+    
+    // Créer le client Supabase avec les cookies pour avoir accès à la session
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value
+          },
+          set(name: string, value: string, options: any) {
+            try {
+              cookieStore.set(name, value, options)
+            } catch (error) {
+              // En Edge Runtime, on ne peut pas toujours modifier les cookies
+            }
+          },
+          remove(name: string, options: any) {
+            try {
+              cookieStore.set(name, '', { ...options, maxAge: 0 })
+            } catch (error) {
+              // En Edge Runtime, on ne peut pas toujours modifier les cookies
+            }
+          },
+        },
+      }
+    )
     
     // Vérifier que l'utilisateur est authentifié
     const { data: { session }, error: sessionError } = await supabase.auth.getSession()
