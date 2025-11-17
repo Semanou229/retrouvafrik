@@ -893,7 +893,7 @@ export default function PublicationForm() {
             </p>
 
             <div className="space-y-4">
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
                 <input
                   type="text"
                   value={videoInput}
@@ -902,7 +902,7 @@ export default function PublicationForm() {
                     setError(null)
                   }}
                   placeholder="https://www.youtube.com/watch?v=... ou https://vimeo.com/..."
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="flex-1 px-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm sm:text-base"
                   onKeyPress={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault()
@@ -913,10 +913,10 @@ export default function PublicationForm() {
                 <button
                   type="button"
                   onClick={addVideo}
-                  className="px-6 py-2 bg-primary text-white rounded-lg font-semibold hover:bg-primary-dark transition-colors flex items-center gap-2"
+                  className="px-4 sm:px-6 py-2.5 sm:py-2 bg-primary text-white rounded-lg font-semibold hover:bg-primary-dark transition-colors flex items-center justify-center gap-2 text-sm sm:text-base w-full sm:w-auto"
                 >
-                  <Plus className="w-5 h-5" />
-                  Ajouter
+                  <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span>Ajouter</span>
                 </button>
               </div>
 
