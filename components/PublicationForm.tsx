@@ -316,7 +316,7 @@ export default function PublicationForm() {
 
       // Envoyer un email à l'admin pour approbation
       try {
-        await fetch('/api/admin/notify-announcement', {
+        await fetch('/api/notifications/admin/announcement', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

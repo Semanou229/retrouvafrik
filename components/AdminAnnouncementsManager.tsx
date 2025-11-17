@@ -71,14 +71,27 @@ export default function AdminAnnouncementsManager({
     try {
       const { error: updateError } = await supabase
         .from('announcements')
-        .update({ approved: true })
+        .update({ approved: true, status: 'active' })
         .eq('id', id)
 
       if (updateError) throw updateError
 
-      setAnnouncements(announcements.map(a => (a.id === id ? { ...a, approved: true } : a)))
+      setAnnouncements(announcements.map(a => (a.id === id ? { ...a, approved: true, status: 'active' } : a)))
       setSuccess('Annonce approuvée avec succès !')
       setTimeout(() => setSuccess(null), 3000)
+
+      // Notifier l'utilisateur par email
+      try {
+        await fetch('/api/notifications/user/announcement-approved', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ announcementId: id }),
+        })
+      } catch (notificationError) {
+        console.error('Erreur lors de l\'envoi de la notification utilisateur:', notificationError)
+      }
     } catch (err: any) {
       setError(err.message || 'Erreur lors de l\'approbation')
     } finally {

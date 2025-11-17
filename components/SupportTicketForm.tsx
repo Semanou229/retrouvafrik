@@ -69,6 +69,19 @@ export default function SupportTicketForm({ userAnnouncements }: SupportTicketFo
 
       if (insertError) throw insertError
 
+      // Notifier l'admin par email
+      try {
+        await fetch('/api/notifications/admin/ticket', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ ticketId: ticket.id }),
+        })
+      } catch (notificationError) {
+        console.error('Erreur lors de l\'envoi de la notification admin:', notificationError)
+      }
+
       setSuccess(true)
       setTimeout(() => {
         router.push('/mon-compte')

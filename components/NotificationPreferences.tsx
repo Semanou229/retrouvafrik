@@ -71,12 +71,58 @@ export default function NotificationPreferences() {
     loadCities()
   }, [selectedCountry])
 
-  // Charger les préférences existantes
+  // Charger les préférences existantes et créer une préférence par défaut avec le pays de l'utilisateur
   useEffect(() => {
     if (user) {
       loadPreferences()
     }
   }, [user])
+
+  useEffect(() => {
+    if (user && preferences.length === 0) {
+      createDefaultPreference()
+    }
+  }, [user, preferences.length])
+
+  const createDefaultPreference = async () => {
+    if (!user) return
+    
+    try {
+      // Vérifier si l'utilisateur a déjà des préférences
+      const { data: existingPrefs } = await supabase
+        .from('user_notification_preferences')
+        .select('*')
+        .eq('user_id', user.id)
+        .limit(1)
+
+      if (existingPrefs && existingPrefs.length > 0) {
+        return // L'utilisateur a déjà des préférences
+      }
+
+      // Récupérer le pays de l'utilisateur depuis ses métadonnées
+      const userCountry = user.user_metadata?.location_country || user.user_metadata?.country
+      
+      if (userCountry) {
+        // Créer une préférence par défaut avec le pays de l'utilisateur
+        const { error } = await supabase
+          .from('user_notification_preferences')
+          .insert({
+            user_id: user.id,
+            country: userCountry,
+            city: null,
+            notify_on_new_announcement: true,
+            notify_on_same_city: false,
+            notify_on_same_country: true,
+          })
+
+        if (!error) {
+          await loadPreferences()
+        }
+      }
+    } catch (err) {
+      console.error('Erreur lors de la création de la préférence par défaut:', err)
+    }
+  }
 
   const loadPreferences = async () => {
     if (!user) return

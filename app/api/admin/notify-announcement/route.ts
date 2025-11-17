@@ -51,18 +51,8 @@ export async function POST(request: Request) {
       }
     }
 
-    // Récupérer l'email de l'admin
-    const { data: { users } } = await supabase.auth.admin.listUsers()
-    const admin = users?.find(
-      (u: any) => u.user_metadata?.role === 'admin' || u.email?.includes('admin')
-    )
-
-    if (!admin) {
-      return NextResponse.json(
-        { error: 'Aucun administrateur trouvé' },
-        { status: 404 }
-      )
-    }
+    // Utiliser l'email admin configuré
+    const adminEmail = 'hello@retrouvafrik.com'
 
     // Construire l'URL d'approbation
     const approvalUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://retrouvafrik.vercel.app'}/admin/annonces?announcement=${announcementId}`
@@ -74,9 +64,9 @@ export async function POST(request: Request) {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${process.env.SMTP_API_KEY || 'default-key'}`,
       },
-      body: JSON.stringify({
-        email: {
-          to: admin.email,
+          body: JSON.stringify({
+            email: {
+              to: adminEmail,
           subject: `🔔 Nouvelle annonce à approuver - ${announcement.title}`,
           html: `
             <!DOCTYPE html>

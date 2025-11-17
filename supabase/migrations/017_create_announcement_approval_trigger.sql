@@ -17,7 +17,7 @@ BEGIN
 
   -- Si aucun admin trouvé, utiliser l'email par défaut
   IF admin_email IS NULL THEN
-    admin_email := 'admin@retrouvafrik.com';
+    admin_email := 'hello@retrouvafrik.com';
   END IF;
 
   -- Construire l'URL de l'annonce

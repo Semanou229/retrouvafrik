@@ -125,6 +125,15 @@ export default function TicketDetailModal({
 
       if (insertError) throw insertError
 
+      // Récupérer le message créé pour obtenir son ID
+      const { data: newMessageData } = await supabase
+        .from('ticket_messages')
+        .select('id')
+        .eq('ticket_id', ticket.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single()
+
       setNewMessage('')
       await loadMessages()
       
@@ -134,6 +143,21 @@ export default function TicketDetailModal({
           .from('support_tickets')
           .update({ status: 'in_progress' })
           .eq('id', ticket.id)
+      }
+
+      // Notifier l'utilisateur si c'est une réponse admin
+      if (isAdmin && newMessageData) {
+        try {
+          await fetch('/api/notifications/user/ticket-reply', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ ticketMessageId: newMessageData.id }),
+          })
+        } catch (notificationError) {
+          console.error('Erreur lors de l\'envoi de la notification utilisateur:', notificationError)
+        }
       }
 
       if (onUpdate) onUpdate()

@@ -41,7 +41,7 @@ export async function POST(request: Request) {
       },
       body: JSON.stringify({
         email: {
-          to: admin.email,
+          to: 'hello@retrouvafrik.com',
           subject: `📢 Nouvelle demande de publicité - ${companyName}`,
           html: `
             <!DOCTYPE html>

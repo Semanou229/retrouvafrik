@@ -458,6 +458,32 @@ export default function MessagesPage({ initialMessages, announcementId }: Messag
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
       }, 100)
+
+      // Notifier le destinataire par email
+      try {
+        await fetch('/api/notifications/user/message', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ messageId: data.id }),
+        })
+      } catch (notificationError) {
+        console.error('Erreur lors de l\'envoi de la notification:', notificationError)
+      }
+
+      // Notifier l'admin si le destinataire est admin
+      try {
+        await fetch('/api/notifications/admin/message', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ messageId: data.id }),
+        })
+      } catch (notificationError) {
+        console.error('Erreur lors de l\'envoi de la notification admin:', notificationError)
+      }
     } catch (err: any) {
       console.error('Error sending message:', err)
       alert('Erreur lors de l\'envoi du message: ' + (err.message || 'Erreur inconnue'))
