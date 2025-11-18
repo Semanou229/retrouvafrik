@@ -416,6 +416,20 @@ export default function Navigation() {
                       <span>Comment ça marche</span>
                     </Link>
 
+                    {/* Ressources */}
+                    <Link
+                      href="/ressources"
+                      className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
+                        isActive('/ressources')
+                          ? 'bg-primary/10 text-primary'
+                          : 'text-gray-700 hover:bg-gray-100'
+                      }`}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <BookOpen className="w-5 h-5" />
+                      <span>Ressources</span>
+                    </Link>
+
                     {/* Section pour utilisateurs non connectés */}
                     {!loading && !user && (
                       <>
