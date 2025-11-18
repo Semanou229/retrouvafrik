@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import Navigation from '@/components/Navigation'
-import Footer from '@/components/Footer'
 import HeroSection from '@/components/HeroSection'
 import AdBanner from '@/components/AdBanner'
 import { Search, Users, Heart, ArrowRight, CheckCircle, Shield, TrendingUp, Globe, Sparkles } from 'lucide-react'
