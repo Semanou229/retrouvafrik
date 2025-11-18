@@ -14,7 +14,7 @@ export default function Footer() {
         <div className="grid md:grid-cols-4 gap-8 mb-12">
           <div>
             <div className="mb-4">
-              <RetrouvAfrikLogo className="text-2xl" />
+              <RetrouvAfrikLogo variant="full" width={50} height={50} className="text-2xl" />
             </div>
             <p className="text-gray-400 leading-relaxed">
               Reconnectons ceux qui se cherchent grâce à la solidarité communautaire.
