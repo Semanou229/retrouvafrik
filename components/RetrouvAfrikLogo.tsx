@@ -8,7 +8,7 @@ interface RetrouvAfrikLogoProps {
   width?: number
   height?: number
   showText?: boolean
-  variant?: 'icon-only' | 'full'
+  variant?: 'icon-only' | 'header' | 'footer'
 }
 
 export default function RetrouvAfrikLogo({ 
@@ -18,7 +18,7 @@ export default function RetrouvAfrikLogo({
   showText = false,
   variant = 'icon-only'
 }: RetrouvAfrikLogoProps) {
-  // Variant 'icon-only' : seulement la silhouette de l'Afrique (pour header)
+  // Variant 'icon-only' : seulement la silhouette de l'Afrique
   if (variant === 'icon-only') {
     return (
       <div className={`flex items-center ${className}`}>
@@ -56,20 +56,71 @@ export default function RetrouvAfrikLogo({
     )
   }
 
-  // Variant 'full' : Logo exact sans fond - silhouette Afrique orange + texte Retrouv
+  // Variant 'header' : Logo pour header - silhouette Afrique orange + texte Retrouv (sans fond)
+  if (variant === 'header') {
+    return (
+      <div className={`flex items-center ${className}`}>
+        {/* Logo header : Silhouette Afrique orange + Texte Retrouv (sans fond) */}
+        <svg
+          width={width * 3.5}
+          height={height}
+          viewBox="0 0 140 40"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="flex-shrink-0"
+        >
+          {/* Silhouette de l'Afrique en orange à gauche */}
+          <g transform="translate(5, 2) scale(0.28)">
+            <path
+              d="M25 20 L30 18 L35 20 L40 25 L42 30 L45 38 L48 45 L50 52 L52 60 L55 68 L58 75 L60 82 L62 88 L65 92 L68 95 L72 92 L75 88 L78 82 L80 75 L82 68 L85 60 L88 52 L90 45 L92 38 L90 30 L88 25 L85 20 L80 18 L75 15 L70 12 L65 10 L60 8 L55 7 L50 6 L45 7 L40 8 L35 10 L30 12 L25 15 Z"
+              fill="#ff6b35"
+            />
+            {/* Détail golfe de Guinée */}
+            <path
+              d="M35 30 L38 35 L40 40 L38 45 L35 42 L32 38 L35 32 Z"
+              fill="#f7931e"
+            />
+            {/* Détail corne de l'Afrique */}
+            <path
+              d="M75 50 L78 55 L80 60 L78 65 L75 62 L72 58 L75 52 Z"
+              fill="#f7931e"
+            />
+            {/* Détail Madagascar */}
+            <path
+              d="M85 70 L88 75 L90 80 L88 85 L85 82 L82 78 L85 72 Z"
+              fill="#f7931e"
+            />
+          </g>
+          
+          {/* Texte "Retrouv" en orange à droite de l'Afrique */}
+          <text x="50" y="28" fontFamily="Arial, sans-serif" fontSize="18" fontWeight="bold" fill="#ff6b35" letterSpacing="1">
+            Retrouv
+          </text>
+        </svg>
+      </div>
+    )
+  }
+
+  // Variant 'footer' : Logo complet avec loupe pour footer - loupe blanche + Afrique orange + RetrouvAfrik
   return (
     <div className={`flex items-center ${className}`}>
-      {/* Logo exact : Silhouette Afrique orange + Texte Retrouv (sans fond) */}
+      {/* Logo footer : Loupe blanche avec Afrique orange + Texte RetrouvAfrik */}
       <svg
-        width={width * 3.5}
+        width={width * 4}
         height={height}
-        viewBox="0 0 140 40"
+        viewBox="0 0 240 50"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         className="flex-shrink-0"
       >
-        {/* Silhouette de l'Afrique en orange à gauche */}
-        <g transform="translate(5, 2) scale(0.28)">
+        {/* Loupe blanche - cercle principal */}
+        <circle cx="25" cy="25" r="20" stroke="white" strokeWidth="3.5" fill="none"/>
+        
+        {/* Manche de la loupe */}
+        <line x1="38" y1="38" x2="48" y2="48" stroke="white" strokeWidth="4" strokeLinecap="round"/>
+        
+        {/* Silhouette de l'Afrique en orange dans la loupe */}
+        <g transform="translate(7, 5) scale(0.35)">
           <path
             d="M25 20 L30 18 L35 20 L40 25 L42 30 L45 38 L48 45 L50 52 L52 60 L55 68 L58 75 L60 82 L62 88 L65 92 L68 95 L72 92 L75 88 L78 82 L80 75 L82 68 L85 60 L88 52 L90 45 L92 38 L90 30 L88 25 L85 20 L80 18 L75 15 L70 12 L65 10 L60 8 L55 7 L50 6 L45 7 L40 8 L35 10 L30 12 L25 15 Z"
             fill="#ff6b35"
@@ -91,9 +142,14 @@ export default function RetrouvAfrikLogo({
           />
         </g>
         
-        {/* Texte "Retrouv" en orange à droite de l'Afrique */}
-        <text x="50" y="28" fontFamily="Arial, sans-serif" fontSize="18" fontWeight="bold" fill="#ff6b35" letterSpacing="1">
+        {/* Texte "Retrouv" en orange */}
+        <text x="60" y="33" fontFamily="Arial, sans-serif" fontSize="22" fontWeight="bold" fill="#ff6b35" letterSpacing="0.5">
           Retrouv
+        </text>
+        
+        {/* Texte "Afrik" en blanc */}
+        <text x="135" y="33" fontFamily="Arial, sans-serif" fontSize="22" fontWeight="bold" fill="white" letterSpacing="0.5">
+          Afrik
         </text>
       </svg>
     </div>
