@@ -1,5 +1,4 @@
 import Navigation from '@/components/Navigation'
-import Footer from '@/components/Footer'
 import ContactForm from '@/components/ContactForm'
 import { Mail, Phone, MapPin, MessageCircle, HelpCircle, Send } from 'lucide-react'
 import Link from 'next/link'
@@ -139,8 +138,6 @@ export default async function ContactPage() {
           </div>
         </div>
       </section>
-
-      <Footer />
     </div>
   )
 }

@@ -1,5 +1,4 @@
 import Navigation from '@/components/Navigation'
-import Footer from '@/components/Footer'
 import { CheckCircle, Search, Plus, MessageCircle, Shield, Heart, Users, Bell, Eye } from 'lucide-react'
 import Link from 'next/link'
 
@@ -422,8 +421,6 @@ export default function CommentCaMarchePage() {
           </div>
         </div>
       </section>
-
-      <Footer />
     </div>
   )
 }

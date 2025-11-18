@@ -1,5 +1,4 @@
 import Navigation from '@/components/Navigation'
-import Footer from '@/components/Footer'
 import AdvertiserForm from '@/components/AdvertiserForm'
 
 export const dynamic = 'force-dynamic'
@@ -76,8 +75,6 @@ export default function AnnonceursPage() {
           </div>
         </div>
       </main>
-
-      <Footer />
     </div>
   )
 }

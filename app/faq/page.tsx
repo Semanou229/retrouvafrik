@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import Navigation from '@/components/Navigation'
-import Footer from '@/components/Footer'
 import { HelpCircle, ChevronDown, Search } from 'lucide-react'
 import Link from 'next/link'
 
@@ -248,8 +247,6 @@ export default function FAQPage() {
           </div>
         </div>
       </section>
-
-      <Footer />
     </div>
   )
 }

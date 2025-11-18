@@ -1,5 +1,4 @@
 import Navigation from '@/components/Navigation'
-import Footer from '@/components/Footer'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { Heart, Server, Users, Shield, Zap, Globe, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
@@ -217,8 +216,6 @@ export default async function DonPage() {
           </div>
         </div>
       </section>
-
-      <Footer />
     </div>
   )
 }
