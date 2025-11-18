@@ -4,7 +4,7 @@ import React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useAuth } from '@/app/providers'
-import { Search, Plus, Eye, LogIn, LogOut, User, MessageCircle, LayoutDashboard, ChevronDown, Shield, HelpCircle, Info } from 'lucide-react'
+import { Search, Plus, Eye, LogIn, LogOut, User, MessageCircle, LayoutDashboard, ChevronDown, Shield, HelpCircle, Info, BookOpen } from 'lucide-react'
 import UnreadMessagesBadge from './UnreadMessagesBadge'
 import AdBanner from './AdBanner'
 import { useState, useRef, useEffect } from 'react'
@@ -103,6 +103,19 @@ export default function Navigation() {
               <Info className="w-4 h-4" />
               <span className="hidden lg:inline">Comment ça marche</span>
               <span className="lg:hidden">Comment</span>
+            </Link>
+
+            {/* Ressources */}
+            <Link
+              href="/ressources"
+              className={`flex items-center space-x-1 px-2 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
+                isActive('/ressources')
+                  ? 'text-primary bg-primary/10'
+                  : 'text-gray-700 hover:text-primary hover:bg-gray-50'
+              }`}
+            >
+              <BookOpen className="w-4 h-4" />
+              <span>Ressources</span>
             </Link>
 
             {/* FAQ et Contact - Visible uniquement si non connecté */}

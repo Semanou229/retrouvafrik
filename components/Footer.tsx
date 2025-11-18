@@ -27,6 +27,7 @@ export default function Footer() {
               <li><Link href="/annonces" className="hover:text-primary transition-colors">Annonces</Link></li>
               <li><Link href="/publier" className="hover:text-primary transition-colors">Publier</Link></li>
               <li><Link href="/perdu-de-vue" className="hover:text-primary transition-colors">Perdu de vue</Link></li>
+              <li><Link href="/ressources" className="hover:text-primary transition-colors">Ressources</Link></li>
             </ul>
           </div>
           <div>
