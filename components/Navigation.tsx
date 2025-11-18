@@ -64,7 +64,7 @@ export default function Navigation() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center">
-            <RetrouvAfrikLogo />
+            <RetrouvAfrikLogo showText={false} width={40} height={40} />
           </Link>
 
           {/* Desktop Navigation */}
