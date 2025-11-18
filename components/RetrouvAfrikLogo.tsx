@@ -19,7 +19,7 @@ export default function RetrouvAfrikLogo({
   variant = 'icon-only'
 }: RetrouvAfrikLogoProps) {
   // Variant 'icon-only' : seulement la silhouette de l'Afrique (pour header)
-  if (variant === 'icon-only' || (!showText && variant === 'icon-only')) {
+  if (variant === 'icon-only') {
     return (
       <div className={`flex items-center ${className}`}>
         {/* Seulement la silhouette de l'Afrique */}
