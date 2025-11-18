@@ -14,30 +14,29 @@ export default function RetrouvAfrikLogo({ className = '', showText = true }: Re
       <svg
         width="40"
         height="40"
-        viewBox="0 0 100 100"
+        viewBox="0 0 100 120"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         className="flex-shrink-0"
       >
-        {/* Silhouette simplifiée de l'Afrique */}
+        {/* Silhouette de l'Afrique - forme simplifiée mais reconnaissable */}
         <path
-          d="M20 15 L25 12 L30 15 L35 20 L38 25 L40 30 L42 35 L45 40 L48 45 L50 50 L52 55 L55 60 L58 65 L60 70 L62 75 L65 80 L68 82 L70 80 L72 75 L75 70 L78 65 L80 60 L82 55 L85 50 L88 45 L90 40 L88 35 L85 30 L82 25 L80 20 L75 18 L70 15 L65 12 L60 10 L55 8 L50 7 L45 8 L40 10 L35 12 L30 15 Z"
-          fill="#ff6b35"
-          stroke="#ff6b35"
-          strokeWidth="1"
-        />
-        {/* Forme plus précise de l'Afrique */}
-        <path
-          d="M25 15 L30 12 L35 15 L40 18 L42 22 L45 28 L48 35 L50 42 L52 50 L55 58 L58 65 L60 72 L62 78 L65 82 L68 85 L72 82 L75 78 L78 72 L80 65 L82 58 L85 50 L88 42 L90 35 L88 28 L85 22 L82 18 L78 15 L72 12 L65 10 L58 8 L50 7 L42 8 L35 10 L28 12 L25 15 Z"
+          d="M25 20 L30 18 L35 20 L40 25 L42 30 L45 38 L48 45 L50 52 L52 60 L55 68 L58 75 L60 82 L62 88 L65 92 L68 95 L72 92 L75 88 L78 82 L80 75 L82 68 L85 60 L88 52 L90 45 L92 38 L90 30 L88 25 L85 20 L80 18 L75 15 L70 12 L65 10 L60 8 L55 7 L50 6 L45 7 L40 8 L35 10 L30 12 L25 15 Z"
           fill="#ff6b35"
         />
-        {/* Détails supplémentaires pour rendre l'Afrique plus reconnaissable */}
+        {/* Détail golfe de Guinée */}
         <path
-          d="M35 25 L38 30 L40 35 L38 40 L35 38 L32 35 L35 30 Z"
+          d="M35 30 L38 35 L40 40 L38 45 L35 42 L32 38 L35 32 Z"
           fill="#f7931e"
         />
+        {/* Détail corne de l'Afrique */}
         <path
-          d="M60 45 L62 50 L65 55 L62 60 L60 58 L58 55 L60 50 Z"
+          d="M75 50 L78 55 L80 60 L78 65 L75 62 L72 58 L75 52 Z"
+          fill="#f7931e"
+        />
+        {/* Détail Madagascar */}
+        <path
+          d="M85 70 L88 75 L90 80 L88 85 L85 82 L82 78 L85 72 Z"
           fill="#f7931e"
         />
       </svg>
