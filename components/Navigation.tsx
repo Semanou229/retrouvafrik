@@ -329,12 +329,7 @@ export default function Navigation() {
               <div className="flex flex-col h-full">
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-gray-200">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                      <span className="text-white font-bold">T</span>
-                    </div>
-                    <RetrouvAfrikLogo />
-                  </div>
+                  <RetrouvAfrikLogo />
                   <button
                     onClick={() => setMobileMenuOpen(false)}
                     className="p-2 rounded-md text-gray-700 hover:bg-gray-100"
