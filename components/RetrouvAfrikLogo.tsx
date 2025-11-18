@@ -56,20 +56,23 @@ export default function RetrouvAfrikLogo({
     )
   }
 
-  // Variant 'full' : Logo complet avec silhouette Afrique et texte Retrouv (pour header et footer)
+  // Variant 'full' : Logo exact avec fond noir, silhouette Afrique orange + texte Retrouv
   return (
     <div className={`flex items-center ${className}`}>
-      {/* Logo complet : Silhouette Afrique orange + Texte Retrouv */}
+      {/* Logo exact : Fond noir, silhouette Afrique orange + Texte Retrouv */}
       <svg
-        width={width * 3}
+        width={width * 3.5}
         height={height}
-        viewBox="0 0 150 40"
+        viewBox="0 0 140 40"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         className="flex-shrink-0"
       >
-        {/* Silhouette de l'Afrique en orange */}
-        <g transform="translate(0, 0) scale(0.3)">
+        {/* Fond noir */}
+        <rect width="140" height="40" fill="#000000" rx="4"/>
+        
+        {/* Silhouette de l'Afrique en orange à gauche */}
+        <g transform="translate(5, 2) scale(0.28)">
           <path
             d="M25 20 L30 18 L35 20 L40 25 L42 30 L45 38 L48 45 L50 52 L52 60 L55 68 L58 75 L60 82 L62 88 L65 92 L68 95 L72 92 L75 88 L78 82 L80 75 L82 68 L85 60 L88 52 L90 45 L92 38 L90 30 L88 25 L85 20 L80 18 L75 15 L70 12 L65 10 L60 8 L55 7 L50 6 L45 7 L40 8 L35 10 L30 12 L25 15 Z"
             fill="#ff6b35"
@@ -91,8 +94,8 @@ export default function RetrouvAfrikLogo({
           />
         </g>
         
-        {/* Texte "Retrouv" en orange */}
-        <text x="50" y="28" fontFamily="Arial, sans-serif" fontSize="20" fontWeight="bold" fill="#ff6b35" letterSpacing="0.5">
+        {/* Texte "Retrouv" en orange à droite de l'Afrique (R majuscule, reste minuscule) */}
+        <text x="50" y="28" fontFamily="Arial, sans-serif" fontSize="18" fontWeight="bold" fill="#ff6b35" letterSpacing="1">
           Retrouv
         </text>
       </svg>
