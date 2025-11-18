@@ -56,10 +56,10 @@ export default function RetrouvAfrikLogo({
     )
   }
 
-  // Variant 'full' : Logo exact avec fond noir, silhouette Afrique orange + texte Retrouv
+  // Variant 'full' : Logo exact sans fond - silhouette Afrique orange + texte Retrouv
   return (
     <div className={`flex items-center ${className}`}>
-      {/* Logo exact : Fond noir, silhouette Afrique orange + Texte Retrouv */}
+      {/* Logo exact : Silhouette Afrique orange + Texte Retrouv (sans fond) */}
       <svg
         width={width * 3.5}
         height={height}
@@ -68,9 +68,6 @@ export default function RetrouvAfrikLogo({
         xmlns="http://www.w3.org/2000/svg"
         className="flex-shrink-0"
       >
-        {/* Fond noir */}
-        <rect width="140" height="40" fill="#000000" rx="4"/>
-        
         {/* Silhouette de l'Afrique en orange à gauche */}
         <g transform="translate(5, 2) scale(0.28)">
           <path
@@ -94,7 +91,7 @@ export default function RetrouvAfrikLogo({
           />
         </g>
         
-        {/* Texte "Retrouv" en orange à droite de l'Afrique (R majuscule, reste minuscule) */}
+        {/* Texte "Retrouv" en orange à droite de l'Afrique */}
         <text x="50" y="28" fontFamily="Arial, sans-serif" fontSize="18" fontWeight="bold" fill="#ff6b35" letterSpacing="1">
           Retrouv
         </text>
