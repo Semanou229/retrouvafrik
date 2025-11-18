@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Heart } from 'lucide-react'
 import AdBanner from './AdBanner'
+import RetrouvAfrikLogo from './RetrouvAfrikLogo'
 
 export default function Footer() {
   return (
@@ -12,11 +13,8 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid md:grid-cols-4 gap-8 mb-12">
           <div>
-            <div className="flex items-center space-x-2 mb-4">
-              <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-xl">R</span>
-              </div>
-              <span className="text-2xl font-bold">RetrouvAfrik</span>
+            <div className="mb-4">
+              <RetrouvAfrikLogo className="text-2xl" />
             </div>
             <p className="text-gray-400 leading-relaxed">
               Reconnectons ceux qui se cherchent grâce à la solidarité communautaire.

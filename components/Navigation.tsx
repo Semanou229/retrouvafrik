@@ -333,7 +333,7 @@ export default function Navigation() {
                     <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                       <span className="text-white font-bold">T</span>
                     </div>
-                    <span className="font-bold text-gray-900">RetrouvAfrik</span>
+                    <RetrouvAfrikLogo />
                   </div>
                   <button
                     onClick={() => setMobileMenuOpen(false)}
